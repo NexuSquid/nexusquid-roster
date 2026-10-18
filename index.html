@@ -3,6 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="preconnect" href="https://script.google.com">
+<link rel="preconnect" href="https://script.googleusercontent.com" crossorigin>
 <title>メンバー名簿</title>
 <style>
 :root{
@@ -292,6 +294,27 @@ html.force-m .pf-fab{right:calc(50% - 208px)}
 .layout-sw{text-align:center;font-size:.8rem;color:var(--muted);margin:28px 0 8px}
 .layout-sw button{background:none;border:none;color:var(--accent);padding:4px 6px;font-size:.8rem;text-decoration:underline;cursor:pointer}
 .layout-sw button.on{color:var(--ink);font-weight:700;text-decoration:none;cursor:default}
+.xp-stats.xp-stats3,html:not(.force-pc) .xp-stats.xp-stats3,html.force-m .xp-stats.xp-stats3{grid-template-columns:repeat(3,1fr)}
+.xpc .ln-today{stroke-dasharray:5 4;opacity:.8}
+.xpc .pt.pt-today{fill:var(--surface);stroke:var(--cc);stroke-width:2.5}
+
+/* ---- スマホ版の一覧（コンパクト表示） ---- */
+.mcard{display:none}
+.mc{display:flex;align-items:center;gap:10px;padding:9px 12px}
+.mrk{flex:0 0 26px;height:26px;display:grid;place-items:center;border-radius:50%;font-weight:800;font-size:.78rem;color:var(--muted);font-variant-numeric:tabular-nums}
+.mrk.md1{background:#f6c945;color:#5a4300}.mrk.md2{background:#cfd6df;color:#39424e}.mrk.md3{background:#e3a06a;color:#5a2e0b}
+.mc .wi.md{width:38px;height:38px;border-radius:10px}
+.mt{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px}
+.mt b{font-size:.98rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mt .mw{font-size:.78rem;color:var(--ink);opacity:.85;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mt .ms{display:flex;flex-wrap:wrap;gap:2px 12px;font-size:.72rem;color:var(--muted)}
+.msub{display:inline-flex;align-items:center;white-space:nowrap}
+.msub .wi.xs{width:16px;height:16px;border-radius:4px;margin-right:3px;vertical-align:0}
+.mon{display:inline-block;width:7px;height:7px;border-radius:50%;background:#16a34a;margin-left:6px;vertical-align:middle}
+.mp{font-weight:800;font-size:1.02rem;font-variant-numeric:tabular-nums;flex:0 0 auto}
+.mc .newb{font-size:.6rem}
+@media (max-width:760px){html:not(.force-pc) tbody tr[data-key]{display:block!important;padding:0!important;margin:0!important;border:none!important;border-bottom:1px solid var(--line)!important;border-radius:0!important;background:var(--surface)!important;-webkit-touch-callout:none;user-select:none}html:not(.force-pc) tbody tr[data-key].picked{background:var(--sel)!important}html:not(.force-pc) tbody tr[data-key] > td{display:none!important}html:not(.force-pc) tbody tr[data-key] > td.mcard{display:block!important;padding:0!important}html:not(.force-pc) .tablewrap{background:var(--surface)!important;border:1px solid var(--line)!important;border-radius:14px!important;overflow:hidden!important}html:not(.force-pc) tbody tr[data-key]:last-child{border-bottom:none!important}}
+html.force-m tbody tr[data-key]{display:block!important;padding:0!important;margin:0!important;border:none!important;border-bottom:1px solid var(--line)!important;border-radius:0!important;background:var(--surface)!important;-webkit-touch-callout:none;user-select:none}html.force-m tbody tr[data-key].picked{background:var(--sel)!important}html.force-m tbody tr[data-key] > td{display:none!important}html.force-m tbody tr[data-key] > td.mcard{display:block!important;padding:0!important}html.force-m .tablewrap{background:var(--surface)!important;border:1px solid var(--line)!important;border-radius:14px!important;overflow:hidden!important}html.force-m tbody tr[data-key]:last-child{border-bottom:none!important}
 </style>
 <script>
 /* ▼▼ ここに Apps Script のウェブアプリのURL（…/exec で終わるもの）を貼り付けてください ▼▼ */
@@ -335,7 +358,7 @@ setTimeout(function(){
       <div class="status"><span class="dot load" id="dot"></span><span id="statusText">ページを準備中…</span></div>
     </div>
     <div class="status">
-      <label class="check"><input type="checkbox" id="auto" checked> <span class="dl">1分ごとに</span>自動更新</label>
+      <label class="check"><input type="checkbox" id="auto" checked> <span class="dl">3分ごとに</span>自動更新</label>
       <button id="mebtn" class="me-btn" hidden>自分</button>
       <button id="theme" title="表示の明るさ（自動／ライト／ダーク）">明るさ：自動</button>
       <button id="reload"><span class="dl">今すぐ</span>更新</button>
@@ -459,11 +482,24 @@ function setStatus(kind, text){ $("dot").className = "dot " + kind; $("statusTex
 // Apps Script のサーバー側（コード.gs の getData）からシートの内容を受け取る
 function toTable(d){ return { cols: d.cols.map(l=>({label:l})), rows: d.rows.map(r=>({c:r})) }; }
 let loadTimer = null;
-let apiImages = null;
+let apiImages = null, lastLoaded = 0, usedLocal = false;
+const LOCAL_KEY = "nsRosterCache";
+/* 前回のデータをこの端末に保存しておき、次に開いたとき通信を待たずにすぐ表示する */
+function showLocalCache(){
+  try{
+    const c = JSON.parse(localStorage.getItem(LOCAL_KEY) || "null");
+    if(!c || !c.d || !c.d.data) return false;
+    parse(toTable(c.d.data));
+    if(c.d.images && typeof applyImages === "function") applyImages(c.d.images);
+    setStatus("load", "前回（" + new Date(c.t).toLocaleString("ja-JP",{month:"numeric",day:"numeric",hour:"2-digit",minute:"2-digit"}) + "）のデータを表示中・最新を読み込み中…");
+    return true;
+  }catch(_e){ return false; }
+}
 function load(){
+  if(!members.length && !usedLocal){ usedLocal = true; showLocalCache(); }
   const url = String(window.ROSTER_API || "");
   if(!/^https:/.test(url) || url.indexOf("script.google.com") < 0){ fail("index.html の ROSTER_API に Apps Script のURLが設定されていません"); return; }
-  setStatus("load", members.length ? "更新中…" : "読み込み中…");
+  if(!members.length) setStatus("load", "読み込み中…");
   clearTimeout(loadTimer);
   loadTimer = setTimeout(()=>fail("サーバーから応答がありません（時間をおいて開き直してください）"), 30000);
   fetch(url + (url.indexOf("?")<0 ? "?" : "&") + "api=data&t=" + Date.now(), { credentials: "omit", cache: "no-store", redirect: "follow" })
@@ -473,7 +509,9 @@ function load(){
       let d; try{ d = JSON.parse(txt); }catch(_e){ throw new Error("データの形式が正しくありません（Apps Script のアクセス設定が「全員」になっているか確認してください）"); }
       if(d.error) throw new Error(d.error);
       parse(toTable(d.data));
+      lastLoaded = Date.now();
       setStatus("ok", "最終更新 " + new Date().toLocaleTimeString("ja-JP"));
+      try{ localStorage.setItem(LOCAL_KEY, JSON.stringify({t: lastLoaded, d: d})); }catch(_e){}
       if(d.images){ apiImages = d.images; if(typeof applyImages === "function") applyImages(d.images); }
     })
     .catch(e=>{ clearTimeout(loadTimer); fail(e && e.message ? e.message : String(e)); });
@@ -631,6 +669,17 @@ function sorted(list){
 }
 
 /* ---------- 描画 ---------- */
+/* スマホ版の一覧（コンパクト表示）：順位・メインブキ・名前・XP・サブブキ1/2 を1人1行で */
+function mobileCard(m, isNew){
+  if(typeof wIcon !== "function") return "";
+  const rk = m.rank <= 3 ? `<span class="mrk md${m.rank}">${m.rank}</span>` : `<span class="mrk">${m.rank}</span>`;
+  const subs = [m.sub1, m.sub2].filter(Boolean).map((w,i)=>`<span class="msub">${wIcon(w, catOf(w), "xs")}${esc(w)}</span>`).join("");
+  return `<div class="mc">${rk}${wIcon(m.main, m.mainCat, "md")}
+    <div class="mt"><b>${esc(m.name)}${onlineNow(m)?'<i class="mon" title="今は主な浮上時間帯です"></i>':''}${isNew?'<span class="newb">NEW</span>':''}</b>
+      <small class="mw">${esc(m.main) || "メインブキ未登録"}</small>
+      ${subs ? `<small class="ms">${subs}</small>` : ""}</div>
+    <span class="mp">${m.power || "–"}</span></div>`;
+}
 const avg = a => a.length ? (a.reduce((x,y)=>x+y,0)/a.length) : NaN;
 const fmt = n => isNaN(n) ? "–" : (Math.round(n*10)/10).toString();
 function median(a){ if(!a.length) return NaN; const s=[...a].sort((x,y)=>x-y), h=s.length>>1; return s.length%2 ? s[h] : (s[h-1]+s[h])/2; }
@@ -665,11 +714,12 @@ function render(){
       <td class="ck"><input type="checkbox" class="pick" ${picked?"checked":""}></td>
       <td class="rank r${m.rank}">${m.rank}</td>
       <td class="name"><span class="nm" title="プロフィールを見る">${esc(m.name)}</span>${onlineNow(m)?'<span class="onl" title="今は主な浮上時間帯です"></span>':''}${isNew?'<span class="newb">NEW</span>':''}<div class="date">${date}</div></td>
-      <td class="pw"><div class="power">${m.power || "–"}</div><div class="bar"><i style="width:${pct}%"></i></div></td>
+      <td class="pw"><div class="power">${m.power || "–"}</div></td>
       <td class="w">${typeof wIcon==="function"?wIcon(m.main,m.mainCat,"sm"):""}<span class="main">${w(m.main)||"–"}</span>${m.mainCat?`<span class="cat" style="--cc:${catVar(m.mainCat)}" data-cat="${m.mainCat}">${m.mainCat}</span>`:""}${subs?`<div class="subs">${subs}</div>`:""}</td>
       <td class="o other">${esc(m.other)}</td>
       <td class="xc">${x}</td>
       <td class="fcc">${fc}</td>
+      <td class="mcard">${mobileCard(m, isNew)}</td>
     </tr>`;
   }).join("");
   $("pickAll").checked = shown.length>0 && shown.every(m=>st.picked.has(m.key));
@@ -744,7 +794,10 @@ $("layoutSw").addEventListener("click", e=>{
 });
 $("totop").addEventListener("click", ()=>window.scrollTo({top:0,behavior:"smooth"}));
 addEventListener("scroll", ()=>$("totop").classList.toggle("show", scrollY>600), {passive:true});
-function setAuto(){ clearInterval(timer); if($("auto").checked) timer = setInterval(load, 60000); }
+/* 自動更新：3分ごと。画面が見えていないとき（別タブ・スマホのスリープ中）は止めて、戻ってきたときに必要なら更新する */
+const AUTO_MS = 180000;
+function setAuto(){ clearInterval(timer); if($("auto").checked) timer = setInterval(()=>{ if(!document.hidden) load(); }, AUTO_MS); }
+document.addEventListener("visibilitychange", ()=>{ if(!document.hidden && $("auto").checked && Date.now() - lastLoaded > AUTO_MS) load(); });
 $("auto").addEventListener("change", setAuto);
 
 const line = (m, full) => [m.name, m.power||"", [m.main,m.sub1,m.sub2].filter(Boolean).join(" / ")].concat(full ? [m.xRaw, m.fc] : []).filter(x=>x!=="").join("　");
@@ -988,7 +1041,19 @@ document.addEventListener("keydown", e=>{
   if(e.key==="Escape") closeProfile();
   if(e.key==="ArrowRight"||e.key==="ArrowLeft"){ const m = members[members.indexOf(cur)+(e.key==="ArrowRight"?1:-1)]; if(m) openProfile(m); }
 });
+/* スマホ版：長押しでメンバーを選択／解除（チームのメンバー集めなどに） */
+let lpTimer = null, lpFired = false, lpStart = null;
+function togglePick(key){ st.picked.has(key) ? st.picked.delete(key) : st.picked.add(key); render(); try{ navigator.vibrate && navigator.vibrate(15); }catch(_e){} }
+$("rows").addEventListener("touchstart", e=>{
+  const tr = e.target.closest("tr[data-key]"); if(!tr || !isMobileView()) return;
+  lpFired = false; lpStart = [e.touches[0].clientX, e.touches[0].clientY];
+  clearTimeout(lpTimer); lpTimer = setTimeout(()=>{ lpFired = true; togglePick(tr.dataset.key); }, 500);
+}, {passive:true});
+$("rows").addEventListener("touchmove", e=>{ if(!lpStart) return; const t = e.touches[0]; if(Math.abs(t.clientX-lpStart[0]) + Math.abs(t.clientY-lpStart[1]) > 10) clearTimeout(lpTimer); }, {passive:true});
+$("rows").addEventListener("touchend", ()=>{ clearTimeout(lpTimer); lpStart = null; }, {passive:true});
+$("rows").addEventListener("contextmenu", e=>{ const tr = e.target.closest("tr[data-key]"); if(tr && isMobileView()){ e.preventDefault(); if(!lpFired) togglePick(tr.dataset.key); } });
 $("rows").addEventListener("click", e=>{
+  if(lpFired){ lpFired = false; return; }   /* 長押しした直後のタップでは開かない */
   if(e.target.closest("a,button,input,label,.cat,[data-copy]")) return;   /* リンク・ボタン・チェックは今まで通り */
   const tr = e.target.closest("tr[data-key]"); if(!tr) return;
   if(window.getSelection && String(window.getSelection()).length) return;          /* 文字を選択しているときは開かない */
@@ -1003,18 +1068,36 @@ $("mebtn").addEventListener("click", ()=>{ const m = members.find(x=>x.key===get
 
 /* ===== XP推移グラフ ===== */
 const fmtD = (t, y) => new Date(t).toLocaleDateString("ja-JP", y ? {year:"numeric",month:"numeric",day:"numeric"} : {month:"numeric",day:"numeric"});
+/* XPの記録は 2026/10/1 から数える（それより前の記録は 10/1 付として扱う） */
+const XP_START = new Date(2026, 9, 1).getTime();
+function xpRecords(m){
+  const raw = m.hist && m.hist.length ? m.hist : (m.power && m.ts ? [{ts:m.ts, power:m.power}] : []);
+  const out = [];
+  raw.forEach(p=>{
+    const r = { ts: Math.max(p.ts, XP_START), power: p.power, early: p.ts < XP_START };
+    const last = out[out.length-1];
+    /* 同じ日の記録は、その日の最後の記録だけを使う */
+    if(last && new Date(last.ts).toDateString() === new Date(r.ts).toDateString()){ r.early = r.early && last.early; out[out.length-1] = r; }
+    else out.push(r);
+  });
+  return out;
+}
 function xpSection(m){
-  const h = m.hist && m.hist.length ? m.hist : (m.power && m.ts ? [{ts:m.ts, power:m.power}] : []);
+  const h = xpRecords(m);
   if(!h.length) return `<div class="xp-note">XPの記録がありません。</div>`;
-  const first = h[0], last = h[h.length-1], best = h.reduce((a,b)=>b.power>a.power?b:a), d = last.power-first.power;
-  const stats = `<div class="xp-stats">
+  const first = h[0], last = h[h.length-1], d = last.power-first.power;
+  const stats = `<div class="xp-stats xp-stats3">
     <div><div class="k">最初の記録（${fmtD(first.ts)}）</div><div class="v">${first.power}</div></div>
     <div><div class="k">最新の記録（${fmtD(last.ts)}）</div><div class="v">${last.power}</div></div>
-    <div><div class="k">記録の中の最高</div><div class="v">${best.power}</div></div>
     <div><div class="k">変化（${h.length}回の記録）</div><div class="v ${d>0?'up':d<0?'dn':''}">${h.length>1?(d>0?"+":"")+fmt(d):"–"}</div></div></div>`;
+  /* 右端は今日。最新の記録を今日の位置にも打つ（最高値は下がらないので、今日の値＝最新の記録） */
+  const now = Date.now();
+  const isTodayLast = new Date(last.ts).toDateString() === new Date(now).toDateString();
+  const pts0 = h.slice();
+  if(!isTodayLast) pts0.push({ ts: now, power: last.power, today: true });
   const mob = isMobileView();
-  const W = mob ? Math.max(280, Math.min(640, (isForcedMobile() ? 440 : innerWidth) - 58)) : 640, H = mob ? 200 : 230, L = mob ? 40 : 46, R = mob ? 12 : 18, T = 18, B = 28;
-  let t0 = first.ts, t1 = last.ts; if(t1-t0 < 2*DAY){ t0 -= 7*DAY; t1 += 7*DAY; }
+  const W = mob ? Math.max(280, Math.min(640, (isForcedMobile() ? 440 : innerWidth) - 58)) : 640, H = mob ? 200 : 230, L = mob ? 40 : 46, R = mob ? 14 : 20, T = 18, B = 28;
+  const t1 = now, t0 = Math.min(first.ts, t1 - 7*DAY);
   const avgP = avg(byPower().map(x=>x.power));
   let lo = Math.min(...h.map(x=>x.power)), hi = Math.max(...h.map(x=>x.power));
   const showAvg = !isNaN(avgP) && avgP > lo-250 && avgP < hi+250; if(showAvg){ lo = Math.min(lo,avgP); hi = Math.max(hi,avgP); }
@@ -1023,22 +1106,26 @@ function xpSection(m){
   const X = t => L + (t-t0)/(t1-t0)*(W-L-R), Y = v => T + (hi-v)/(hi-lo)*(H-T-B);
   const grid = []; for(let v=lo; v<=hi; v+=stp) grid.push(`<line x1="${L}" x2="${W-R}" y1="${Y(v)}" y2="${Y(v)}"/><text x="${L-8}" y="${Y(v)+4}" text-anchor="end">${v}</text>`);
   const nT = Math.min(mob ? 3 : 5, Math.max(2, Math.round((t1-t0)/(7*DAY)))), yrs = new Date(t0).getFullYear()!==new Date(t1).getFullYear();
-  const xt = []; for(let i=0;i<=nT;i++){ const t = t0+(t1-t0)*i/nT; xt.push(`<text x="${X(t)}" y="${H-8}" text-anchor="${i===0?'start':i===nT?'end':'middle'}">${fmtD(t, yrs)}</text>`); }
-  const pts = h.map(p=>[X(p.ts),Y(p.power)]);
-  const path = pts.map((p,i)=>(i?"L":"M")+p[0].toFixed(1)+","+p[1].toFixed(1)).join("");
-  const area = h.length>1 ? `<path class="ar" d="${path}L${pts[pts.length-1][0].toFixed(1)},${H-B}L${pts[0][0].toFixed(1)},${H-B}Z"/>` : "";
-  const lp = pts[pts.length-1];
+  const xt = []; for(let i=0;i<=nT;i++){ const t = t0+(t1-t0)*i/nT; xt.push(`<text x="${X(t)}" y="${H-8}" text-anchor="${i===0?'start':i===nT?'end':'middle'}">${i===nT ? "今日" : fmtD(t, yrs)}</text>`); }
+  const pts = pts0.map(p=>[X(p.ts),Y(p.power)]);
+  const recPts = pts.slice(0, h.length);
+  const path = recPts.map((p,i)=>(i?"L":"M")+p[0].toFixed(1)+","+p[1].toFixed(1)).join("");
+  const tp = pts[pts.length-1], lp = recPts[recPts.length-1];
+  const fullPath = pts.map((p,i)=>(i?"L":"M")+p[0].toFixed(1)+","+p[1].toFixed(1)).join("");
+  const area = pts.length>1 ? `<path class="ar" d="${fullPath}L${tp[0].toFixed(1)},${H-B}L${pts[0][0].toFixed(1)},${H-B}Z"/>` : "";
   const svg = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(m.name)}のXP推移">
     <g class="grid ax">${grid.join("")}</g><g class="ax">${xt.join("")}</g>
-    ${showAvg?`<g class="avg"><line x1="${L}" x2="${W-R}" y1="${Y(avgP)}" y2="${Y(avgP)}"/><text x="${W-R}" y="${Y(avgP)-5}" text-anchor="end">全体平均 ${fmt(avgP)}</text></g>`:""}
+    ${showAvg?`<g class="avg"><line x1="${L}" x2="${W-R}" y1="${Y(avgP)}" y2="${Y(avgP)}"/><text x="${L+4}" y="${Y(avgP)-5}">全体平均 ${fmt(avgP)}</text></g>`:""}
     ${area}${h.length>1?`<path class="ln" d="${path}"/>`:""}
+    ${!isTodayLast?`<line class="ln ln-today" x1="${lp[0].toFixed(1)}" y1="${lp[1].toFixed(1)}" x2="${tp[0].toFixed(1)}" y2="${tp[1].toFixed(1)}"/>`:""}
     <line class="guide" x1="0" x2="0" y1="${T}" y2="${H-B}"/>
-    ${pts.map((p,i)=>`<circle class="pt" data-i="${i}" cx="${p[0].toFixed(1)}" cy="${p[1].toFixed(1)}" r="4.5"/>`).join("")}
-    <text class="lbl" x="${Math.min(lp[0], W-R-4)}" y="${lp[1]-12}" text-anchor="${lp[0]>W-90?'end':'middle'}">${last.power}</text>
+    ${pts.map((p,i)=>`<circle class="pt${pts0[i].today?' pt-today':''}" data-i="${i}" cx="${p[0].toFixed(1)}" cy="${p[1].toFixed(1)}" r="4.5"/>`).join("")}
+    <text class="lbl" x="${Math.min(tp[0], W-R-2)}" y="${tp[1]-12}" text-anchor="end">${last.power}</text>
   </svg>`;
-  const tbl = `<details class="xp-table"><summary>数値で見る</summary><table><thead><tr><th>日時</th><th>XP</th><th>前回比</th></tr></thead><tbody>${h.map((p,i)=>{ const dd = i? p.power-h[i-1].power : null; return `<tr><td>${new Date(p.ts).toLocaleString("ja-JP",{year:"numeric",month:"numeric",day:"numeric",hour:"2-digit",minute:"2-digit"})}</td><td>${p.power}</td><td>${dd==null?"–":(dd>0?"+":"")+fmt(dd)}</td></tr>`; }).reverse().join("")}</tbody></table></details>`;
+  const dateText = p => p.early ? "2026/10/1（それ以前の記録）" : new Date(p.ts).toLocaleString("ja-JP",{year:"numeric",month:"numeric",day:"numeric",hour:"2-digit",minute:"2-digit"});
+  const tbl = `<details class="xp-table"><summary>数値で見る</summary><table><thead><tr><th>日時</th><th>XP</th><th>前回比</th></tr></thead><tbody>${h.map((p,i)=>{ const dd = i? p.power-h[i-1].power : null; return `<tr><td>${dateText(p)}</td><td>${p.power}</td><td>${dd==null?"–":(dd>0?"+":"")+fmt(dd)}</td></tr>`; }).reverse().join("")}</tbody></table></details>`;
   const note = h.length<2 ? `<div class="xp-note">記録が1回分だけです。フォームにもう一度回答すると、その時点のXPが追加されて推移が見られるようになります。</div>` : "";
-  xpData = {h, pts, W};
+  xpData = {h: pts0, pts, W};
   return stats + `<div class="xpc">${svg}<div class="xptip"></div></div>` + note + tbl;
 }
 let xpData = null;
@@ -1051,7 +1138,8 @@ function xpHover(e){
   const g = svg.querySelector(".guide"); g.setAttribute("x1", p[0]); g.setAttribute("x2", p[0]);
   svg.querySelectorAll(".pt").forEach((c,i)=>c.classList.toggle("hl", i===bi));
   const tip = box.querySelector(".xptip");
-  tip.innerHTML = `${new Date(d.ts).toLocaleDateString("ja-JP",{year:"numeric",month:"numeric",day:"numeric"})}<br><b>${d.power}</b>${prev?`（${d.power-prev.power>=0?"+":""}${fmt(d.power-prev.power)}）`:""}`;
+  tip.innerHTML = d.today ? `今日<br><b>${d.power}</b>（最新の記録）`
+    : `${d.early ? "2026/10/1（それ以前の記録）" : new Date(d.ts).toLocaleDateString("ja-JP",{year:"numeric",month:"numeric",day:"numeric"})}<br><b>${d.power}</b>${prev && !prev.today?`（${d.power-prev.power>=0?"+":""}${fmt(d.power-prev.power)}）`:""}`;
   tip.style.left = Math.min(Math.max(p[0]*k, 50), r.width-50) + "px"; tip.style.top = (p[1]*k) + "px";
 }
 $("pf").addEventListener("pointermove", xpHover);
