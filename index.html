@@ -220,6 +220,9 @@ body.pf-open{overflow:hidden}
 .xptip{position:absolute;pointer-events:none;background:var(--ink);color:var(--bg);font-size:.75rem;padding:5px 9px;border-radius:8px;white-space:nowrap;transform:translate(-50%,calc(-100% - 10px));opacity:0;transition:opacity .1s;z-index:2}
 .xptip b{font-size:.9rem;font-variant-numeric:tabular-nums}
 .xpc.hov .xptip{opacity:1}
+.xptip.below{transform:translate(-50%,14px)}
+.xptip{max-width:calc(100% - 4px);white-space:normal;text-align:center}
+.xptip br+b{white-space:nowrap}
 .xp-note{font-size:.8rem;color:var(--muted);margin-top:8px}
 .xp-table summary{font-size:.78rem;color:var(--muted);cursor:pointer;margin-top:8px}
 .xp-table table{margin-top:6px;font-size:.82rem}
@@ -439,7 +442,17 @@ body.has-sel .wrap{padding-bottom:210px}
 .cb-track i.any{opacity:.3}
 .cb-n{text-align:right;font-variant-numeric:tabular-nums;color:var(--muted);white-space:nowrap}
 .cb-n b{color:var(--ink)}
-.card-img{width:100%;border-radius:12px;display:block;box-shadow:0 6px 20px rgba(0,0,0,.18)}
+.card-img{width:100%;aspect-ratio:1200/630;border-radius:12px;display:block;box-shadow:0 6px 20px rgba(0,0,0,.18);background:var(--line)}
+.card-form{display:grid;gap:6px}
+.cf-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap;font-size:.86rem;font-weight:700}
+.cf-row>span:first-child{min-width:84px}
+.cf-ctl{display:flex;gap:8px;flex-wrap:wrap}
+.cf-ctl .tbtn{font-size:.8rem;padding:6px 12px}
+.cf-row input[type=text]{flex:1 1 220px;min-width:0;font:inherit;font-size:16px;font-weight:400;padding:8px 12px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--ink)}
+.cf-note{font-size:.74rem;color:var(--muted);margin:-2px 0 6px}
+.g-range{gap:8px}
+.g-range input[type=date]{font:inherit;font-size:15px;padding:6px 10px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--ink)}
+.g-pre{display:flex;gap:6px;flex-wrap:wrap}
 @media (max-width:760px){html:not(.force-pc) .tools{flex-wrap:nowrap;overflow-x:auto;margin:0 -12px 10px;padding:0 12px 2px;scrollbar-width:none}html:not(.force-pc) .tools::-webkit-scrollbar{display:none}html:not(.force-pc) .tbtn{flex:0 0 auto;font-size:.8rem;padding:7px 12px}html:not(.force-pc) .tl-back{padding:0}html:not(.force-pc) .tl{border-radius:0;min-height:100%}html:not(.force-pc) .tl-body{padding:12px 12px 24px;gap:10px}html:not(.force-pc) .tl-head{padding:10px 12px}html:not(.force-pc) .hc{height:28px;font-size:.66rem}html:not(.force-pc) .hg .hh{font-size:.52rem}html:not(.force-pc) .cb-row{grid-template-columns:84px minmax(0,1fr) 64px}html:not(.force-pc) body.has-sel .totop{bottom:170px}}
 html.force-m .tools{flex-wrap:nowrap;overflow-x:auto;margin:0 -12px 10px;padding:0 12px 2px;scrollbar-width:none}html.force-m .tools::-webkit-scrollbar{display:none}html.force-m .tbtn{flex:0 0 auto;font-size:.8rem;padding:7px 12px}html.force-m .tl-back{padding:0}html.force-m .tl{border-radius:0;min-height:100%;max-width:440px}html.force-m .tl-body{padding:12px 12px 24px;gap:10px}html.force-m .tl-head{padding:10px 12px}html.force-m .hc{height:28px;font-size:.66rem}html.force-m .hg .hh{font-size:.52rem}html.force-m .cb-row{grid-template-columns:84px minmax(0,1fr) 64px}html.force-m body.has-sel .totop{bottom:170px}
 </style>
@@ -451,7 +464,7 @@ window.ROSTER_API = "https://script.google.com/macros/s/AKfycbwUwev8hkXZQ9LkZ5Y4
 <script>
 /* 表示切替（自動／スマホ版／PC版）：このブラウザに保存 */
 var NS_LAYOUT = "auto";
-try{ NS_LAYOUT = localStorage.getItem("nsLayout") || "auto"; }catch(_e){}
+try{ localStorage.removeItem("nsLayout"); NS_LAYOUT = sessionStorage.getItem("nsLayout") || "auto"; }catch(_e){}
 function applyLayout(mode){
   NS_LAYOUT = mode;
   var h = document.documentElement;
@@ -954,7 +967,7 @@ function paintLayoutSw(){ document.querySelectorAll("#layoutSw button").forEach(
 paintLayoutSw();
 $("layoutSw").addEventListener("click", e=>{
   const b = e.target.closest("button[data-l]"); if(!b || b.dataset.l===NS_LAYOUT) return;
-  applyLayout(b.dataset.l); try{ localStorage.setItem("nsLayout", b.dataset.l); }catch(_e){}
+  applyLayout(b.dataset.l); try{ sessionStorage.setItem("nsLayout", b.dataset.l); }catch(_e){}
   paintLayoutSw(); render(); if(cur) openProfile(cur, true); window.scrollTo(0,0);
 });
 $("totop").addEventListener("click", ()=>window.scrollTo({top:0,behavior:"smooth"}));
@@ -1322,7 +1335,11 @@ function xpHover(e){
   const tip = box.querySelector(".xptip");
   tip.innerHTML = d.today ? `今日<br><b>${d.power}</b>（最新の記録）`
     : `${d.early ? "2026/10/1（それ以前の記録）" : new Date(d.ts).toLocaleDateString("ja-JP",{year:"numeric",month:"numeric",day:"numeric"})}<br><b>${d.power}</b>${prev && !prev.today?`（${d.power-prev.power>=0?"+":""}${fmt(d.power-prev.power)}）`:""}`;
-  tip.style.left = Math.min(Math.max(p[0]*k, 50), r.width-50) + "px"; tip.style.top = (p[1]*k) + "px";
+  /* 吹き出しがグラフの外にはみ出さないよう、実際の幅を測って左右・上下の位置を調整する */
+  const tw = tip.offsetWidth, th = tip.offsetHeight, half = tw/2 + 2;
+  const cx = tw + 4 >= r.width ? r.width/2 : Math.min(Math.max(p[0]*k, half), r.width - half);
+  tip.style.left = cx + "px"; tip.style.top = (p[1]*k) + "px";
+  tip.classList.toggle("below", p[1]*k < th + 12);
 }
 $("pf").addEventListener("pointermove", xpHover);
 $("pf").addEventListener("pointerdown", xpHover);
@@ -1389,15 +1406,14 @@ const FORM_URL = "https:\/\/forms.gle/5aoY9MAGdyVghyTU6";
 let FORM_PREFILL = "";   /* 名前欄が入力済みのフォームURL（Apps Script から届く。届かなければ空） */
 function setFormInfo(f){ FORM_PREFILL = (f && f.prefill) ? String(f.prefill) : ""; }
 $("formLink").href = FORM_URL;
-function formUrlFor(m){ return (m && FORM_PREFILL) ? FORM_PREFILL.split("NSNAMEPLACEHOLDER").join(encodeURIComponent(m.name)) : FORM_URL; }
-function openForm(m){
-  if(m && !FORM_PREFILL) copy(m.name, "名前をコピーしました。フォームの名前欄に貼り付けてください");
-  window.open(formUrlFor(m), "_blank", "noopener");
-}
+/* フォームの「★名前」欄（entry.562222164）に名前を入れた状態で開くURL */
+const FORM_NAME_URL = "https:\/\/docs.google.com/forms/d/e/1FAIpQLSfFrA4D_iHi3APkSarNEA88ARA0HFBy9Quz0xhvAlKNgxv03g/viewform?usp=pp_url&entry.562222164=NSNAMEPLACEHOLDER";
+function formUrlFor(m){ return m ? (FORM_PREFILL || FORM_NAME_URL).split("NSNAMEPLACEHOLDER").join(encodeURIComponent(m.name)) : FORM_URL; }
+function openForm(m){ window.open(formUrlFor(m), "_blank", "noopener"); }
 function updateSection(m){
   return `<div class="pf-sec pf-upd"><h3>情報の更新</h3>
-    <p>XP・ブキ・浮上時間帯などが変わったら、フォームで<b>変わった項目だけ</b>回答してください。空欄の項目は今の内容のまま残ります（消したい項目は「なし」と入力）。</p>
-    <button class="primary" data-act="form">${FORM_PREFILL ? "名前入りの更新フォームを開く" : "更新フォームを開く（名前をコピーします）"}</button>
+    <p>XP・ブキ・浮上時間帯などが変わったら、フォームで<b>変わった項目だけ</b>回答してください。空欄の項目は今の内容のまま残ります。</p>
+    <button class="primary" data-act="form">名前入りの更新フォームを開く</button>
     ${m.updTs ? `<small>最終更新 ${fmtD(m.updTs, true)}${isStale(m) ? `（${staleDays(m)}日前）` : ""}</small>` : ""}</div>`;
 }
 
@@ -1487,23 +1503,43 @@ TL_ACTS.rdays = a=>{ recentDays = +a.dataset.v; tlRender(); };
 function openRecent(){ openTool("最近の動き", "名簿への新規登録と情報の更新", recentBody); }
 
 /* ---------- XPが伸びた人 ---------- */
-let growthMode = "prev";
+let growthMode = "range";
+const ymd = t => { const d = new Date(t), z = n => (n < 10 ? "0" : "") + n; return d.getFullYear() + "-" + z(d.getMonth()+1) + "-" + z(d.getDate()); };
+const parseYmd = s => { const a = String(s).split("-").map(Number); return a.length === 3 && a[0] ? new Date(a[0], a[1]-1, a[2]).getTime() : NaN; };
+let gFrom = ymd(XP_START), gTo = ymd(Date.now());
 function growthList(mode){
+  let t0 = parseYmd(gFrom), t1 = parseYmd(gTo) + DAY - 1;
+  if(isNaN(t0)) t0 = XP_START; if(isNaN(t1)) t1 = Date.now();
+  if(t0 > t1){ const t = t0; t0 = t1 - DAY + 1; t1 = t + DAY - 1; }
   return members.map(m=>{
-    const h = xpRecords(m); if(h.length < 2) return null;
-    const a = mode==="prev" ? h[h.length-2] : h[0], b = h[h.length-1];
+    const h = xpRecords(m); if(!h.length) return null;
+    let a, b;
+    if(mode === "prev"){ if(h.length < 2) return null; a = h[h.length-2]; b = h[h.length-1]; }
+    else {
+      /* 期間の初めのXP＝開始日までの最後の記録（なければ期間内の最初の記録）、終わりのXP＝終了日までの最後の記録 */
+      const before = h.filter(p=>p.ts <= t0), inside = h.filter(p=>p.ts > t0 && p.ts <= t1);
+      if(!inside.length) return null;
+      a = before.length ? before[before.length-1] : inside[0]; b = inside[inside.length-1];
+      if(a === b) return null;
+    }
     return {m: m, from: a, to: b, d: b.power - a.power};
   }).filter(x=>x && x.d > 0).sort((x,y)=>y.d-x.d || y.to.ts-x.to.ts);
 }
 function growthBody(){
   const list = growthList(growthMode);
-  const head = `<div class="row">${segBtns("gmode", [["prev","前回の記録から"],["all","最初の記録から"]], growthMode)}</div>`;
-  if(!list.length) return head + `<div class="pf-sec"><div class="tl-empty">まだXPが伸びた記録がありません。<br>フォームでXPを更新すると、ここに並びます。</div></div>`;
+  const head = `<div class="row">${segBtns("gmode", [["range","期間を指定"],["prev","前回の記録から"]], growthMode)}</div>` +
+    (growthMode === "range" ? `<div class="row g-range"><input type="date" data-tlc="gfrom" value="${gFrom}" min="${ymd(XP_START)}"> 〜 <input type="date" data-tlc="gto" value="${gTo}" min="${ymd(XP_START)}">
+      <span class="g-pre">${[["7日",7],["30日",30]].map(p=>`<button class="chip" data-tl="gpre" data-v="${p[1]}">直近${p[0]}</button>`).join("")}<button class="chip" data-tl="gpre" data-v="0">10/1から</button></span></div>
+      <div class="tsum">期間の初め（開始日までの最後の記録）から、期間内の最後の記録までの伸び幅です。</div>` : "");
+  if(!list.length) return head + `<div class="pf-sec"><div class="tl-empty">${growthMode === "range" ? "この期間にXPが伸びた人はいません。" : "まだXPが伸びた記録がありません。<br>フォームでXPを更新すると、ここに並びます。"}</div></div>`;
   const d = p => p.early ? "10/1" : fmtD(p.ts);
   return head + `<div class="pf-sec">${list.slice(0, 30).map((x,i)=>`<div class="tl-row"><span class="tl-rk">${i+1}</span>${personChip(x.m)}<span class="grow gft">${x.from.power} → <b>${x.to.power}</b>　<small class="date">${d(x.from)}〜${d(x.to)}</small></span><span class="gup">+${fmt(x.d)}</span></div>`).join("")}</div>`;
 }
 TL_ACTS.gmode = a=>{ growthMode = a.dataset.v; tlRender(); };
-function openGrowth(){ openTool("XPが伸びた人", "XPの記録が2回以上ある人の伸び幅ランキング", growthBody); }
+TL_ACTS.gfrom = a=>{ if(a.value) gFrom = a.value; tlRender(); };
+TL_ACTS.gto = a=>{ if(a.value) gTo = a.value; tlRender(); };
+TL_ACTS.gpre = a=>{ const n = +a.dataset.v; gTo = ymd(Date.now()); gFrom = n ? ymd(Math.max(XP_START, Date.now() - (n-1)*DAY)) : ymd(XP_START); tlRender(); };
+function openGrowth(){ openTool("XPが伸びた人", "XPの伸び幅ランキング", growthBody); }
 
 /* ---------- 情報が古い人 ---------- */
 function staleBody(){
@@ -1732,54 +1768,124 @@ function svgImg(inner, color){
     im.src = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svg);
   });
 }
+function loadImg(src){ return new Promise(res=>{ if(!src) return res(null); const im = new Image(); im.onload = ()=>res(im); im.onerror = ()=>res(null); im.src = src; }); }
 function rr(ctx, x, y, w, h, r){ ctx.beginPath(); ctx.moveTo(x+r, y); ctx.arcTo(x+w, y, x+w, y+h, r); ctx.arcTo(x+w, y+h, x, y+h, r); ctx.arcTo(x, y+h, x, y, r); ctx.arcTo(x, y, x+w, y, r); ctx.closePath(); }
+const CARD_FF = '"Hiragino Sans","Noto Sans JP","Yu Gothic UI",system-ui,sans-serif';
 function fitText(ctx, text, maxW, size, weight){
-  const FF = '"Hiragino Sans","Noto Sans JP","Yu Gothic UI",system-ui,sans-serif';
-  let s = size; do { ctx.font = `${weight} ${s}px ${FF}`; s -= 2; } while(ctx.measureText(text).width > maxW && s > 14);
+  let s = size; do { ctx.font = `${weight} ${s}px ${CARD_FF}`; s -= 2; } while(ctx.measureText(text).width > maxW && s > 14);
 }
-function makeCard(m){
+/* 一言を最大2行に折り返す（入りきらない分は「…」） */
+function wrapLines(ctx, text, maxW, maxLines){
+  const out = []; let line = "";
+  for(const ch of text){
+    if(ctx.measureText(line + ch).width > maxW){ out.push(line); line = ch; if(out.length === maxLines) break; }
+    else line += ch;
+  }
+  if(out.length < maxLines && line) out.push(line);
+  else if(out.length === maxLines){ let last = out[maxLines-1]; while(last && ctx.measureText(last + "…").width > maxW) last = last.slice(0, -1); out[maxLines-1] = last + "…"; }
+  return out;
+}
+/* アイコン画像と一言は、この端末に人ごとに保存（次に作るときも残る） */
+const cardState = { key: "", img: "", comment: "", url: "", file: null };
+function cardLoad(k){ try{ const s = JSON.parse(localStorage.getItem("nsCard_" + k) || "null") || {}; return { img: s.img || "", comment: s.comment || "" }; }catch(_e){ return { img: "", comment: "" }; } }
+function cardSave(){ try{ localStorage.setItem("nsCard_" + cardState.key, JSON.stringify({ img: cardState.img, comment: cardState.comment })); }catch(_e){ toast("画像が大きすぎて、この端末に保存できませんでした（今回の作成には使えます）"); } }
+function drawCard(m){
   const color = cssVar("--c-" + (CAT_KEY[m.mainCat] || "none")) || "#5b3cf5";
   const cv = document.createElement("canvas"); cv.width = 1200; cv.height = 630;
   const ctx = cv.getContext("2d");
-  const go = function(icon){
+  const go = function(arr){
+    const icon = arr[0], photo = arr[1];
     ctx.fillStyle = color; ctx.fillRect(0, 0, 1200, 630);
     const g = ctx.createLinearGradient(0, 0, 1200, 630); g.addColorStop(0, "rgba(0,0,0,0)"); g.addColorStop(1, "rgba(0,0,0,.5)");
     ctx.fillStyle = g; ctx.fillRect(0, 0, 1200, 630);
     ctx.fillStyle = "rgba(255,255,255,.08)"; ctx.beginPath(); ctx.arc(1110, 60, 260, 0, Math.PI*2); ctx.fill();
     ctx.fillStyle = "rgba(255,255,255,.06)"; ctx.beginPath(); ctx.arc(960, 640, 200, 0, Math.PI*2); ctx.fill();
+    /* アイコン：アップロードした画像があれば正方形に切り抜いて表示、なければブキ種アイコン */
     ctx.fillStyle = "#fff"; rr(ctx, 64, 64, 220, 220, 48); ctx.fill();
-    if(icon) ctx.drawImage(icon, 89, 89, 170, 170);
+    if(photo){
+      const s = Math.min(photo.width, photo.height);
+      ctx.save(); rr(ctx, 70, 70, 208, 208, 42); ctx.clip();
+      ctx.drawImage(photo, (photo.width - s)/2, (photo.height - s)/2, s, s, 70, 70, 208, 208);
+      ctx.restore();
+    } else if(icon) ctx.drawImage(icon, 89, 89, 170, 170);
     ctx.fillStyle = "#fff"; ctx.textBaseline = "alphabetic";
-    fitText(ctx, m.name, 820, 76, 800); ctx.fillText(m.name, 320, 150);
-    const tags = [m.mainCat ? m.mainCat + "使い" : "", winsOf(m) ? "大会優勝 " + winsOf(m) + "回" : ""].filter(Boolean).join("　・　");
-    fitText(ctx, tags, 820, 30, 600); ctx.globalAlpha = .9; ctx.fillText(tags, 322, 205); ctx.globalAlpha = 1;
-    if(m.x){ fitText(ctx, "X  @" + m.x, 820, 26, 600); ctx.globalAlpha = .85; ctx.fillText("X  @" + m.x, 322, 255); ctx.globalAlpha = 1; }
+    fitText(ctx, m.name, 820, 76, 800); ctx.fillText(m.name, 320, 140);
+    const tags = [m.mainCat ? m.mainCat + "使い" : "", winsOf(m) ? "大会優勝 " + winsOf(m) + "回" : "", m.x ? "X @" + m.x : ""].filter(Boolean).join("　・　");
+    fitText(ctx, tags, 820, 28, 600); ctx.globalAlpha = .9; ctx.fillText(tags, 322, 190); ctx.globalAlpha = 1;
+    /* 一言 */
+    const cm = cardState.comment.trim();
+    if(cm){
+      ctx.font = `700 30px ${CARD_FF}`;
+      const lines = wrapLines(ctx, cm, 790, 2);
+      ctx.fillStyle = "rgba(255,255,255,.16)"; rr(ctx, 318, 214, 818, lines.length > 1 ? 92 : 56, 16); ctx.fill();
+      ctx.fillStyle = "#fff"; lines.forEach((l, i)=>ctx.fillText(l, 336, 252 + i*38));
+    }
     const pct = percentile(m);
     const kp = [["最高パワー", String(m.power || "–")], ["パワー順位", m.rank + " / " + members.length], ["上位", pct != null ? pct + "%" : "–"]];
     kp.forEach((k, i)=>{
-      const x = 64 + i*262, y = 320;
-      ctx.fillStyle = "rgba(255,255,255,.16)"; rr(ctx, x, y, 246, 118, 22); ctx.fill();
-      ctx.fillStyle = "#fff"; fitText(ctx, k[0], 210, 22, 600); ctx.globalAlpha = .85; ctx.fillText(k[0], x+22, y+40); ctx.globalAlpha = 1;
-      fitText(ctx, k[1], 210, 46, 800); ctx.fillText(k[1], x+22, y+96);
+      const x = 64 + i*262, y = 330;
+      ctx.fillStyle = "rgba(255,255,255,.16)"; rr(ctx, x, y, 246, 112, 22); ctx.fill();
+      ctx.fillStyle = "#fff"; fitText(ctx, k[0], 210, 22, 600); ctx.globalAlpha = .85; ctx.fillText(k[0], x+22, y+38); ctx.globalAlpha = 1;
+      fitText(ctx, k[1], 210, 44, 800); ctx.fillText(k[1], x+22, y+92);
     });
     const wl = "メイン  " + (m.main || "–") + ([m.sub1, m.sub2].filter(Boolean).length ? "　／　サブ  " + [m.sub1, m.sub2].filter(Boolean).join("・") : "");
-    fitText(ctx, wl, 1070, 30, 700); ctx.fillText(wl, 66, 500);
-    if(m.sched){ const s = schedSummary(m).replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim(); if(s){ const t = "よく浮上する時間  " + s; fitText(ctx, t, 1070, 26, 600); ctx.globalAlpha = .9; ctx.fillText(t, 66, 548); ctx.globalAlpha = 1; } }
+    fitText(ctx, wl, 1070, 30, 700); ctx.fillText(wl, 66, 506);
+    if(m.sched){ const s = schedSummary(m).replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim(); if(s){ const t = "よく浮上する時間  " + s; fitText(ctx, t, 1070, 26, 600); ctx.globalAlpha = .9; ctx.fillText(t, 66, 552); ctx.globalAlpha = 1; } }
     const foot = "メンバー名簿 ・ " + fmtD(Date.now(), true);
-    fitText(ctx, foot, 600, 20, 600); ctx.globalAlpha = .75; ctx.textAlign = "right"; ctx.fillText(foot, 1136, 598); ctx.textAlign = "left"; ctx.globalAlpha = 1;
+    fitText(ctx, foot, 600, 20, 600); ctx.globalAlpha = .75; ctx.textAlign = "right"; ctx.fillText(foot, 1136, 602); ctx.textAlign = "left"; ctx.globalAlpha = 1;
     cv.toBlob(function(blob){
       if(!blob){ toast("画像を作れませんでした"); return; }
-      const url = URL.createObjectURL(blob), file = (typeof File === "function") ? new File([blob], m.name + "_プロフィール.png", {type: "image/png"}) : null;
-      const canShare = !!(file && navigator.canShare && navigator.canShare({files: [file]}));
-      TL_ACTS.cshare = ()=>{ navigator.share({files: [file], title: m.name}).catch(function(){}); };
-      openTool("プロフィール画像", "自己紹介やDiscordに貼るときに", ()=>`<img class="card-img" src="${url}" alt="${esc(m.name)}のプロフィール画像">
-        <div class="tbtns"><a class="tbtn tform" href="${url}" download="${esc(m.name)}_プロフィール.png">画像を保存</a>${canShare ? '<button class="tbtn" data-tl="cshare">共有する</button>' : ""}</div>
-        <div class="tsum">スマホでは画像を長押しして保存することもできます。ブキ画像は入らず、ブキ種のアイコンで表示されます。</div>`);
+      if(cardState.url) URL.revokeObjectURL(cardState.url);
+      cardState.url = URL.createObjectURL(blob);
+      cardState.file = (typeof File === "function") ? new File([blob], m.name + "_プロフィール.png", {type: "image/png"}) : null;
+      const img = $("tl").querySelector(".card-img"), dl = $("cardDl");
+      if(img) img.src = cardState.url;
+      if(dl) dl.href = cardState.url;
+      const sh = $("cardShare");
+      if(sh) sh.hidden = !(cardState.file && navigator.canShare && navigator.canShare({files: [cardState.file]}));
     }, "image/png");
   };
-  const run = () => svgImg(ICONS[CAT_KEY[m.mainCat] || "none"], color).then(go);
+  const run = () => Promise.all([svgImg(ICONS[CAT_KEY[m.mainCat] || "none"], color), loadImg(cardState.img)]).then(go);
   if(document.fonts && document.fonts.ready) document.fonts.ready.then(run); else run();
 }
+function makeCard(m){
+  const saved = cardLoad(m.key);
+  cardState.key = m.key; cardState.img = saved.img; cardState.comment = saved.comment;
+  openTool("プロフィール画像", "自己紹介やDiscordに貼るときに", ()=>`
+    <img class="card-img" alt="${esc(m.name)}のプロフィール画像">
+    <div class="pf-sec card-form">
+      <div class="cf-row"><span>アイコン画像</span>
+        <span class="cf-ctl"><label class="tbtn"><input type="file" accept="image/*" data-tlc="cimg" hidden>画像を選ぶ</label><button class="tbtn" data-tl="cimgdel"${cardState.img ? "" : " hidden"} id="cardImgDel">画像を外す</button></span></div>
+      <div class="cf-note">正方形（1:1）で表示されます。縦長・横長の画像は中央が切り抜かれます。</div>
+      <label class="cf-row"><span>一言</span><input type="text" id="cardComment" data-tli="ccomment" maxlength="50" placeholder="例：エリア好きです！気軽に誘ってください" value="${esc(cardState.comment)}"></label>
+      <div class="cf-note">50文字まで（長いときは2行に折り返します）。画像と一言はこの端末に保存されます。</div>
+    </div>
+    <div class="tbtns"><a class="tbtn tform" id="cardDl" href="#" download="${esc(m.name)}_プロフィール.png">画像を保存</a><button class="tbtn" data-tl="cshare" id="cardShare" hidden>共有する</button></div>
+    <div class="tsum">スマホでは画像を長押しして保存することもできます。</div>`);
+  drawCard(m);
+}
+TL_ACTS.cshare = ()=>{ if(cardState.file) navigator.share({files: [cardState.file], title: "プロフィール"}).catch(function(){}); };
+TL_ACTS.cimg = a=>{
+  const f = a.files && a.files[0]; if(!f) return;
+  const rd = new FileReader();
+  rd.onload = ()=>loadImg(rd.result).then(im=>{
+    if(!im){ toast("画像を読み込めませんでした"); return; }
+    /* 中央を正方形に切り抜き、440px に縮めて保存（端末の保存容量を使いすぎないように） */
+    const s = Math.min(im.width, im.height), c = document.createElement("canvas"); c.width = c.height = 440;
+    c.getContext("2d").drawImage(im, (im.width - s)/2, (im.height - s)/2, s, s, 0, 0, 440, 440);
+    cardState.img = c.toDataURL("image/jpeg", 0.9); cardSave();
+    const del = $("cardImgDel"); if(del) del.hidden = false;
+    const m = members.find(x=>x.key===cardState.key); if(m) drawCard(m);
+  });
+  rd.readAsDataURL(f);
+};
+TL_ACTS.cimgdel = ()=>{ cardState.img = ""; cardSave(); $("cardImgDel").hidden = true; const m = members.find(x=>x.key===cardState.key); if(m) drawCard(m); };
+let cardT = null;
+$("tlback").addEventListener("input", e=>{
+  const a = e.target.closest("[data-tli=ccomment]"); if(!a) return;
+  cardState.comment = a.value;
+  clearTimeout(cardT); cardT = setTimeout(()=>{ cardSave(); const m = members.find(x=>x.key===cardState.key); if(m) drawCard(m); }, 300);
+});
 
 /* ---------- ボタンのつなぎ込み ---------- */
 $("tools").addEventListener("click", e=>{
