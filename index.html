@@ -1017,7 +1017,6 @@ function openProfile(m, keepScroll){
       <div class="wtiles">${wtile("メイン",m.main,"main")}${wtile("サブ 1",m.sub1)}${wtile("サブ 2",m.sub2)}</div>
       ${m.other?`<div class="pf-other"><b>その他</b>${esc(m.other)}</div>`:""}
     </div>
-    ${awardsSection(m)}
     <div class="pf-sec">
       <h3>主な浮上時間帯</h3>
       ${schedSection(m)}
@@ -1035,6 +1034,7 @@ function openProfile(m, keepScroll){
       <div class="pinfo"><span>全体平均 <b>${fmt(avgP)}</b></span>${!isNaN(diff)?`<span>平均との差 <b class="${diff>=0?'up':'dn'}">${diff>=0?"+":""}${fmt(diff)}</b></span>`:""}<span>中央値 <b>${fmt(median(a.map(x=>x.power)))}</b></span></div>
       ${histogram(m)}
     </div>
+    ${awardsSection(m)}
     <div class="pf-sec">
       <h3>つながり</h3>
       ${sameMain.length?`<div class="sub-h">同じメインブキ（${esc(m.main)}）</div><div class="people">${sameMain.map(personChip).join("")}</div>`:""}
