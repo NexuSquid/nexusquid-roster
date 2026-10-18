@@ -82,7 +82,7 @@ a.x{color:var(--accent);text-decoration:none;white-space:nowrap}a.x:hover{text-d
 .selbar button{white-space:nowrap}
 .selbar b{font-variant-numeric:tabular-nums}
 .selbar button{background:transparent;color:inherit;border-color:rgba(127,127,127,.5)}
-.toast{position:fixed;top:16px;left:50%;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:8px 16px;border-radius:10px;font-size:.85rem;opacity:0;transition:opacity .2s;pointer-events:none;z-index:9}
+.toast{position:fixed;top:16px;left:50%;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:8px 16px;border-radius:10px;font-size:.85rem;opacity:0;transition:opacity .2s;pointer-events:none;z-index:60}
 .toast.show{opacity:1}
 kbd{font-size:.7rem;border:1px solid var(--line);border-radius:4px;padding:0 4px;color:var(--muted)}
 .filters{display:grid;gap:12px}
@@ -334,6 +334,114 @@ html.force-m tbody tr[data-key]{display:block!important;padding:0!important;marg
 .aw-m small{color:var(--muted);font-size:.7rem;margin-right:2px}
 .person.mate{padding:3px 9px 3px 3px;font-size:.78rem}.person.mate .wi{width:20px;height:20px}
 .mate-off{font-size:.78rem;color:var(--muted);padding:3px 8px;border:1px dashed var(--line);border-radius:999px}
+/* ---- 追加機能：ツール ---- */
+.tools{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px}
+.tbtn{display:inline-flex;align-items:center;gap:6px;font:inherit;font-size:.85rem;font-weight:600;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:999px;padding:7px 14px;cursor:pointer;text-decoration:none;white-space:nowrap}
+.tbtn:hover{border-color:var(--accent)}
+.tbtn.tform{background:var(--accent);border-color:var(--accent);color:#fff}
+.tn{display:inline-block;min-width:18px;padding:0 5px;border-radius:999px;background:var(--accent-soft);color:var(--accent);font-size:.7rem;line-height:18px;text-align:center}
+.tn:empty{display:none}
+.fav{border:none;background:none;padding:0 6px 0 0;font-size:1rem;line-height:1;color:var(--muted);cursor:pointer;vertical-align:-1px}
+.fav:hover{color:var(--gold)}.fav.on{color:var(--gold)}
+.mfav{font-style:normal;color:var(--gold);margin-right:3px}
+.tag-stale{background:rgba(0,0,0,.28)!important}
+.pf-upd p{margin:0 0 10px;font-size:.86rem}
+.pf-upd small{display:block;margin-top:8px;color:var(--muted);font-size:.76rem}
+.pf-upd button{padding:9px 16px;font-weight:700}
+.selbar{flex-wrap:wrap;justify-content:center;max-width:min(860px,calc(100% - 32px))}
+.selbar .selx{border-color:color-mix(in srgb,var(--bg) 55%,transparent)!important;font-weight:700}
+body.has-sel .wrap{padding-bottom:210px}
+.tl-back{position:fixed;inset:0;background:rgba(10,12,18,.55);backdrop-filter:blur(3px);z-index:35;display:none;overflow-y:auto;padding:28px 16px}
+.tl-back.show{display:block}
+.tl{max-width:860px;margin:0 auto;background:var(--bg);border-radius:22px;overflow:hidden;box-shadow:0 24px 60px rgba(0,0,0,.35)}
+.tl-head{position:sticky;top:0;z-index:2;display:flex;justify-content:space-between;align-items:center;gap:10px;padding:14px 18px;background:var(--surface);border-bottom:1px solid var(--line)}
+.tl-head h2{margin:0;font-size:1.12rem}
+.tl-head small{color:var(--muted);font-size:.78rem}
+.tl-head button{flex:0 0 auto}
+.tl-body{padding:16px 18px 22px;display:grid;gap:14px}
+.tl-body .pf-sec>p{margin:0 0 8px;font-size:.85rem;color:var(--muted)}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--surface)}
+.seg button{border:none;border-radius:0;padding:6px 12px;background:none}
+.seg button+button{border-left:1px solid var(--line)}
+.seg button.on{background:var(--accent);color:#fff}
+.tl-date{font-size:.75rem;color:var(--muted);font-weight:700;margin:14px 0 2px}
+.tl-date:first-child{margin-top:0}
+.tl-row{display:flex;align-items:center;gap:8px 10px;padding:9px 0;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.tl-row:last-child{border-bottom:none}
+.tl-row .grow{flex:1 1 180px;min-width:0}
+.tl-rk{width:26px;text-align:center;font-weight:800;color:var(--muted);font-variant-numeric:tabular-nums}
+.bdg{font-size:.68rem;font-weight:700;border-radius:999px;padding:1px 8px;white-space:nowrap}
+.bdg.new{background:color-mix(in srgb,var(--new) 14%,transparent);color:var(--new)}
+.bdg.upd{background:var(--accent-soft);color:var(--accent)}
+.chg{font-size:.8rem;color:var(--muted);display:flex;flex-wrap:wrap;gap:2px 12px}
+.chg b{color:var(--ink)}
+.gup{color:#16a34a;font-weight:800;font-variant-numeric:tabular-nums;white-space:nowrap}
+.gft{font-variant-numeric:tabular-nums;font-size:.85rem;white-space:nowrap}
+.tl-empty{padding:24px;text-align:center;color:var(--muted);font-size:.9rem}
+.tbtns{display:flex;gap:8px;flex-wrap:wrap}
+.hg{display:grid;gap:3px;align-items:center}
+.hg .hh{font-size:.6rem;color:var(--muted);text-align:center;white-space:nowrap;letter-spacing:-.02em}
+.hg .hd{font-size:.78rem;font-weight:700;text-align:center}
+.hg .hd.sun{color:#dc2626}.hg .hd.sat{color:#2563eb}
+.hc{height:30px;border-radius:6px;display:grid;place-items:center;font-size:.72rem;font-weight:700;font-variant-numeric:tabular-nums;cursor:pointer;background:color-mix(in srgb,var(--accent) var(--p),var(--bg));color:var(--ink);border:none;padding:0;min-width:0}
+.hc.dk{color:#fff}
+.hc.zero{color:transparent}
+.hc.all{box-shadow:inset 0 0 0 2px #16a34a}
+.hc.sel{outline:2px solid var(--ink);outline-offset:1px}
+.hg-detail{margin-top:12px;font-size:.85rem}
+.hg-detail .sub-h{margin-top:8px}
+.hg-sum{display:grid;gap:4px;font-size:.88rem;margin-bottom:12px}
+.hg-sum b{margin-right:6px}
+.topts{display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center;font-size:.86rem}
+.tsum{font-size:.85rem;color:var(--muted)}
+.tsum b{color:var(--ink);font-variant-numeric:tabular-nums}
+.teams{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:10px}
+.team{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:12px}
+.team h4{margin:0 0 6px;display:flex;justify-content:space-between;align-items:baseline;gap:8px;font-size:1rem}
+.team h4 span{font-size:.76rem;color:var(--muted);font-weight:600;font-variant-numeric:tabular-nums}
+.tm{display:flex;align-items:center;gap:8px;padding:5px 0;cursor:pointer;font-size:.88rem;border-top:1px solid var(--line)}
+.tm:hover b{color:var(--accent)}
+.tm .wi.sm{margin-right:0}
+.tm .tmn{flex:1;min-width:0;display:flex;flex-direction:column}
+.tm b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tm small{color:var(--muted);font-size:.72rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tm .p{font-variant-numeric:tabular-nums;font-weight:700}
+.cmp-h{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px}
+.cmp-c{--cc:var(--c-none);border-radius:14px;padding:12px;color:#fff;background:linear-gradient(135deg,var(--cc),color-mix(in srgb,var(--cc) 55%,#111));display:flex;gap:10px;align-items:center;cursor:pointer;min-width:0;border-top:5px solid var(--k)}
+.cmp-c .wi{background:rgba(255,255,255,.95)}
+.cmp-c>div{min-width:0}
+.cmp-c b{display:block;font-size:1.05rem;overflow-wrap:anywhere;line-height:1.25}
+.cmp-c small{opacity:.9;font-size:.78rem}
+.cmpA{--k:var(--c-shooter)}.cmpB{--k:var(--c-slosher)}
+.cmp-g{display:grid;grid-template-columns:auto minmax(0,1fr) minmax(0,1fr)}
+.cmp-g>div{padding:8px 8px;border-bottom:1px solid var(--line);font-size:.86rem}
+.cmp-g>div:nth-last-child(-n+3){border-bottom:none}
+.cmp-g .ck2{color:var(--muted);font-size:.76rem;white-space:nowrap;padding-left:0}
+.cmp-g .cv{font-weight:600;overflow-wrap:anywhere}
+.cmp-g .cv.win{color:#16a34a}
+.xpc .cl{fill:none;stroke:var(--k);stroke-width:2.2;stroke-linejoin:round;stroke-linecap:round}
+.xpc .cl.dash{stroke-dasharray:5 4;opacity:.7}
+.xpc .cp{fill:var(--k);stroke:var(--surface);stroke-width:2}
+.xpc .ct{fill:var(--k);font-size:12px;font-weight:800}
+.lg{display:flex;gap:6px 14px;font-size:.78rem;color:var(--muted);flex-wrap:wrap;margin-top:8px}
+.lg i{display:inline-block;width:12px;height:12px;border-radius:3px;vertical-align:-2px;margin-right:4px}
+.sc-track i.both{background:var(--accent)}
+.sc-track i.oa{background:color-mix(in srgb,var(--c-shooter) 45%,transparent)}
+.sc-track i.ob{background:color-mix(in srgb,var(--c-slosher) 45%,transparent)}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:8px}
+.kpis div{background:var(--bg);border-radius:10px;padding:8px 10px}
+.kpis .k{font-size:.7rem;color:var(--muted)}
+.kpis .v{font-weight:800;font-size:1.15rem;font-variant-numeric:tabular-nums}
+.cb-row{display:grid;grid-template-columns:96px minmax(0,1fr) 72px;gap:8px;align-items:center;font-size:.82rem;margin:5px 0}
+.cb-row>span:first-child{display:flex;align-items:center;white-space:nowrap}
+.cb-track{height:14px;background:var(--bg);border-radius:4px;position:relative;overflow:hidden}
+.cb-track i{position:absolute;left:0;top:0;bottom:0;background:var(--cc);border-radius:4px}
+.cb-track i.any{opacity:.3}
+.cb-n{text-align:right;font-variant-numeric:tabular-nums;color:var(--muted);white-space:nowrap}
+.cb-n b{color:var(--ink)}
+.card-img{width:100%;border-radius:12px;display:block;box-shadow:0 6px 20px rgba(0,0,0,.18)}
+@media (max-width:760px){html:not(.force-pc) .tools{flex-wrap:nowrap;overflow-x:auto;margin:0 -12px 10px;padding:0 12px 2px;scrollbar-width:none}html:not(.force-pc) .tools::-webkit-scrollbar{display:none}html:not(.force-pc) .tbtn{flex:0 0 auto;font-size:.8rem;padding:7px 12px}html:not(.force-pc) .tl-back{padding:0}html:not(.force-pc) .tl{border-radius:0;min-height:100%}html:not(.force-pc) .tl-body{padding:12px 12px 24px;gap:10px}html:not(.force-pc) .tl-head{padding:10px 12px}html:not(.force-pc) .hc{height:28px;font-size:.66rem}html:not(.force-pc) .hg .hh{font-size:.52rem}html:not(.force-pc) .cb-row{grid-template-columns:84px minmax(0,1fr) 64px}html:not(.force-pc) body.has-sel .totop{bottom:170px}}
+html.force-m .tools{flex-wrap:nowrap;overflow-x:auto;margin:0 -12px 10px;padding:0 12px 2px;scrollbar-width:none}html.force-m .tools::-webkit-scrollbar{display:none}html.force-m .tbtn{flex:0 0 auto;font-size:.8rem;padding:7px 12px}html.force-m .tl-back{padding:0}html.force-m .tl{border-radius:0;min-height:100%;max-width:440px}html.force-m .tl-body{padding:12px 12px 24px;gap:10px}html.force-m .tl-head{padding:10px 12px}html.force-m .hc{height:28px;font-size:.66rem}html.force-m .hg .hh{font-size:.52rem}html.force-m .cb-row{grid-template-columns:84px minmax(0,1fr) 64px}html.force-m body.has-sel .totop{bottom:170px}
 </style>
 <script>
 /* ▼▼ ここに Apps Script のウェブアプリのURL（…/exec で終わるもの）を貼り付けてください ▼▼ */
@@ -392,6 +500,14 @@ setTimeout(function(){
     <div class="stat"><div class="k">表示中の平均</div><div class="v" id="sShownAvg">–</div></div>
   </div>
 
+  <div class="tools" id="tools">
+    <a class="tbtn tform" id="formLink" href="#" target="_blank" rel="noopener">＋ 登録・更新フォーム</a>
+    <button class="tbtn" data-tool="recent">最近の動き<span class="tn" id="recentN"></span></button>
+    <button class="tbtn" data-tool="growth">XPが伸びた人</button>
+    <button class="tbtn" data-tool="stats">サーバー統計</button>
+    <button class="tbtn" data-tool="stale">情報が古い人<span class="tn" id="staleN"></span></button>
+  </div>
+
   <div class="panel">
     <div class="row">
       <div class="qwrap" id="finder"><input type="search" id="q" autocomplete="off" placeholder="名前・ブキ・X・フレコで検索"><div class="sugg" id="sugg"></div></div>
@@ -430,6 +546,8 @@ setTimeout(function(){
       <label class="check"><input type="checkbox" id="newOnly"> 7日以内の新規登録</label>
       <label class="check"><input type="checkbox" id="pickedOnly"> 選択中のみ表示</label>
       <label class="check"><input type="checkbox" id="nowOnline"> 今が浮上時間帯の人</label>
+      <label class="check"><input type="checkbox" id="favOnly"> お気に入りのみ</label>
+      <label class="check"><input type="checkbox" id="staleOnly"> 3か月以上更新がない人</label>
     </div>
     <div class="row mreset"><button id="clear2">条件をすべてリセット</button></div>
     </div>
@@ -453,12 +571,16 @@ setTimeout(function(){
   <div class="layout-sw" id="layoutSw">表示切替：<button data-l="auto">自動</button>・<button data-l="m">スマホ版</button>・<button data-l="pc">PC版</button></div>
 </div>
 
+<div class="tl-back" id="tlback"><div class="tl" id="tl" role="dialog" aria-modal="true"></div></div>
 <div class="pf-back" id="pfback"><button class="pf-fab" data-close aria-label="閉じる">✕</button><div class="pf" id="pf" role="dialog" aria-modal="true"></div></div>
 <div class="selbar" id="selbar">
   <span class="info"><span><b id="selN">0</b>人選択</span><span>平均 <b id="selAvg">–</b></span><span>合計 <b id="selSum">–</b></span></span>
   <button id="selCopy"><span class="dl">名前・ブキをコピー</span><span class="ml">コピー</span></button>
   <button id="selCopyFull"><span class="dl">X・フレコ込みでコピー</span><span class="ml">X・フレコ込み</span></button>
   <button id="selClear"><span class="dl">選択解除</span><span class="ml">解除</span></button>
+  <button id="selTeam" class="selx">チーム分け</button>
+  <button id="selTime" class="selx"><span class="dl">浮上時間の重なり</span><span class="ml">時間の重なり</span></button>
+  <button id="selCmp" class="selx"><span class="dl">2人を比較</span><span class="ml">比較</span></button>
 </div>
 <div class="toast" id="toast"></div>
 <button class="totop" id="totop" aria-label="上へ戻る">↑</button>
@@ -508,7 +630,7 @@ function showLocalCache(){
   try{
     const c = JSON.parse(localStorage.getItem(LOCAL_KEY) || "null");
     if(!c || !c.d || !c.d.data) return false;
-    setResults(c.d.results);
+    setResults(c.d.results); setFormInfo(c.d.form);
     parse(toTable(c.d.data));
     if(c.d.images && typeof applyImages === "function") applyImages(c.d.images);
     setStatus("load", "前回（" + new Date(c.t).toLocaleString("ja-JP",{month:"numeric",day:"numeric",hour:"2-digit",minute:"2-digit"}) + "）のデータを表示中・最新を読み込み中…");
@@ -528,7 +650,7 @@ function load(){
       clearTimeout(loadTimer);
       let d; try{ d = JSON.parse(txt); }catch(_e){ throw new Error("データの形式が正しくありません（Apps Script のアクセス設定が「全員」になっているか確認してください）"); }
       if(d.error) throw new Error(d.error);
-      setResults(d.results);
+      setResults(d.results); setFormInfo(d.form);
       parse(toTable(d.data));
       lastLoaded = Date.now();
       setStatus("ok", "最終更新 " + new Date().toLocaleTimeString("ja-JP"));
@@ -606,19 +728,22 @@ function parse(table){
   for(const [k, g] of groups){
     if(hasFlag && !g.flagged) continue;   // 「抽出」が1つも付いていない人は名簿に出さない
     g.rows.sort((a,b)=>a.ts-b.ts);
-    const cur = {}, hist = [];
+    const cur = {}, hist = [], log = [];
     for(const row of g.rows){
-      const c = row.c;
+      const c = row.c, changes = [];
       for(const f of FIELDS){
         const v = str(c[C[f]]);
         if(v === "") continue;               // 空欄＝変更なし
-        cur[f] = CLEAR.test(v) ? "" : v;
+        const nv = CLEAR.test(v) ? "" : v;
+        if((cur[f]||"") !== nv) changes.push({f:f, from:cur[f]||"", to:nv});
+        cur[f] = nv;
       }
       const pw = parseFloat(val(c[C.power]));
       if(row.ts && pw) hist.push({ts: row.ts, power: pw});
       /* 浮上時間帯は表全体で1つの項目：どれか1日でも答えていれば、その回答の表で丸ごと置き換える */
       const days = GRID.map(ci=>ci>=0 ? str(c[ci]) : "");
-      if(days.some(v=>v!=="")) cur.sched = days.map(v=>slotsOf(v));
+      if(days.some(v=>v!=="")){ cur.sched = days.map(v=>slotsOf(v)); changes.push({f:"sched"}); }
+      log.push({ts: row.ts, changes: changes});
     }
     const last = g.rows[g.rows.length-1];
     const m = {
@@ -627,7 +752,7 @@ function parse(table){
       ts: g.rows[0].ts, updTs: last.ts,       // ts＝最初の登録日、updTs＝最後に更新した日
       main: cur.main||"", sub1: cur.sub1||"", sub2: cur.sub2||"", other: cur.other||"",
       xRaw: cur.x||"", x: xId(cur.x||""), fc: cur.fc||"",
-      sched: cur.sched || null
+      sched: cur.sched || null, log: log
     };
     m.mainCat = catOf(m.main);
     m.allCats = [...new Set([m.main,m.sub1,m.sub2].map(catOf).filter(Boolean))];
@@ -671,6 +796,8 @@ function filtered(){
     if($("newOnly").checked && !(m.ts && now - m.ts < 7*DAY)) return false;
     if($("pickedOnly").checked && !st.picked.has(m.key)) return false;
     if($("nowOnline").checked && !onlineNow(m)) return false;
+    if($("favOnly").checked && !isFav(m)) return false;
+    if($("staleOnly").checked && !isStale(m)) return false;
     if(inc.some(t=>!m.hay.includes(t))) return false;
     if(exc.some(t=>m.hay.includes(t))) return false;
     return true;
@@ -711,7 +838,7 @@ function mobileCard(m, isNew){
   const rk = m.rank <= 3 ? `<span class="mrk md${m.rank}">${m.rank}</span>` : `<span class="mrk">${m.rank}</span>`;
   const subs = [m.sub1, m.sub2].filter(Boolean).map((w,i)=>`<span class="msub">${wIcon(w, catOf(w), "xs")}${esc(w)}</span>`).join("");
   return `<div class="mc">${rk}${wIcon(m.main, m.mainCat, "md")}
-    <div class="mt"><b>${esc(m.name)}${onlineNow(m)?'<i class="mon" title="今は主な浮上時間帯です"></i>':''}${isNew?'<span class="newb">NEW</span>':''}</b>
+    <div class="mt"><b>${isFav(m)?'<i class="mfav">★</i>':''}${esc(m.name)}${onlineNow(m)?'<i class="mon" title="今は主な浮上時間帯です"></i>':''}${isNew?'<span class="newb">NEW</span>':''}</b>
       <small class="mw">${esc(m.main) || "メインブキ未登録"}</small>
       ${subs ? `<small class="ms">${subs}</small>` : ""}</div>
     <span class="mp">${m.power || "–"}</span></div>`;
@@ -722,6 +849,7 @@ function median(a){ if(!a.length) return NaN; const s=[...a].sort((x,y)=>x-y), h
 let shown = [];
 function render(){
   shown = sorted(filtered());
+  if(typeof isFav === "function"){ const fv = shown.filter(isFav); if(fv.length) shown = fv.concat(shown.filter(m=>!isFav(m))); }
   const pw = members.map(m=>m.power).filter(Boolean), spw = shown.map(m=>m.power).filter(Boolean);
   const max = Math.max(...pw), min = Math.min(...pw), now = Date.now();
   $("sCount").textContent = members.length + "人";
@@ -730,7 +858,7 @@ function render(){
   $("sShown").textContent = shown.length + "人";
   $("sShownAvg").textContent = fmt(avg(spw));
   $("shownM").textContent = `${shown.length}人を表示中` + (spw.length ? `（平均 ${fmt(avg(spw))}）` : "");
-  const nf = st.cats.size + (($("pmin").value||$("pmax").value)?1:0) + ["hasX","hasFC","newOnly","pickedOnly","nowOnline"].filter(id=>$(id).checked).length + (slotAny()?1:0);
+  const nf = st.cats.size + (($("pmin").value||$("pmax").value)?1:0) + ["hasX","hasFC","newOnly","pickedOnly","nowOnline","favOnly","staleOnly"].filter(id=>$(id).checked).length + (slotAny()?1:0);
   $("fcount").textContent = nf || "";
 
   const [sk,sd] = $("sort").value.split(":");
@@ -749,7 +877,7 @@ function render(){
     return `<tr class="${picked?'picked':''}" data-key="${esc(m.key)}">
       <td class="ck"><input type="checkbox" class="pick" ${picked?"checked":""}></td>
       <td class="rank r${m.rank}">${m.rank}</td>
-      <td class="name"><span class="nm" title="プロフィールを見る">${esc(m.name)}</span>${onlineNow(m)?'<span class="onl" title="今は主な浮上時間帯です"></span>':''}${isNew?'<span class="newb">NEW</span>':''}<div class="date">${date}</div></td>
+      <td class="name"><button class="fav${isFav(m)?' on':''}" data-fav="${esc(m.key)}" title="${isFav(m)?'お気に入りから外す':'お気に入りに追加（一覧の上に表示）'}">${isFav(m)?'★':'☆'}</button><span class="nm" title="プロフィールを見る">${esc(m.name)}</span>${onlineNow(m)?'<span class="onl" title="今は主な浮上時間帯です"></span>':''}${isNew?'<span class="newb">NEW</span>':''}<div class="date">${date}</div></td>
       <td class="pw"><div class="power">${m.power || "–"}</div></td>
       <td class="w">${typeof wIcon==="function"?wIcon(m.main,m.mainCat,"sm"):""}<span class="main">${w(m.main)||"–"}</span>${m.mainCat?`<span class="cat" style="--cc:${catVar(m.mainCat)}" data-cat="${m.mainCat}">${m.mainCat}</span>`:""}${subs?`<div class="subs">${subs}</div>`:""}</td>
       <td class="o other">${esc(m.other)}</td>
@@ -780,6 +908,7 @@ async function copy(text, msg){
 $("rows").addEventListener("click", e=>{
   const t = e.target, tr = t.closest("tr"); if(!tr) return;
   if(t.dataset.copy){ copy(t.dataset.copy, "フレンドコードをコピーしました"); return; }
+  if(t.dataset.fav){ toggleFav(t.dataset.fav); return; }
   if(t.classList.contains("cat")){ st.cats = new Set([t.dataset.cat]); renderChips(); render(); return; }
   if(t.classList.contains("pick")){ const k = tr.dataset.key; t.checked ? st.picked.add(k) : st.picked.delete(k); tr.classList.toggle("picked", t.checked); $("pickAll").checked = shown.every(m=>st.picked.has(m.key)); renderSel(); save(); }
 });
@@ -804,12 +933,12 @@ document.querySelectorAll("th.s").forEach(th=>th.addEventListener("click", ()=>{
   $("sort").value = opt.value; render();
 }));
 ["q","pmin","pmax"].forEach(id=>$(id).addEventListener("input", ()=>{ renderChips(); render(); }));
-["sort","andCats","hasX","hasFC","newOnly","pickedOnly","nowOnline"].forEach(id=>$(id).addEventListener("change", render));
+["sort","andCats","hasX","hasFC","newOnly","pickedOnly","nowOnline","favOnly","staleOnly"].forEach(id=>$(id).addEventListener("change", render));
 document.querySelectorAll("input[name=slot]").forEach(r=>r.addEventListener("change", ()=>{ renderChips(); render(); }));
 $("clear2").addEventListener("click", ()=>$("clear").click());
 $("clear").addEventListener("click", ()=>{
   $("q").value=""; $("pmin").value=""; $("pmax").value=""; st.cats.clear();
-  ["andCats","hasX","hasFC","newOnly","pickedOnly","nowOnline"].forEach(id=>$(id).checked=false);
+  ["andCats","hasX","hasFC","newOnly","pickedOnly","nowOnline","favOnly","staleOnly"].forEach(id=>$(id).checked=false);
   document.querySelector('input[name=slot][value=main]').checked = true; $("sort").value="power:desc";
   renderChips(); render();
 });
@@ -858,7 +987,7 @@ document.addEventListener("keydown", e=>{
 const SKEY = "nsRosterState";
 function save(){ try{ localStorage.setItem(SKEY, JSON.stringify({
   q:$("q").value, sort:$("sort").value, pmin:$("pmin").value, pmax:$("pmax").value, cats:[...st.cats], picked:[...st.picked],
-  slot:document.querySelector('input[name=slot]:checked').value, and:$("andCats").checked, hasX:$("hasX").checked, hasFC:$("hasFC").checked, newOnly:$("newOnly").checked, nowOnline:$("nowOnline").checked
+  slot:document.querySelector('input[name=slot]:checked').value, and:$("andCats").checked, hasX:$("hasX").checked, hasFC:$("hasFC").checked, newOnly:$("newOnly").checked, nowOnline:$("nowOnline").checked, favOnly:$("favOnly").checked, staleOnly:$("staleOnly").checked
 })); }catch(_e){} }
 function restore(){ try{
   const s = JSON.parse(localStorage.getItem(SKEY)||"null"); if(!s) return;
@@ -866,7 +995,7 @@ function restore(){ try{
   if([...$("sort").options].some(o=>o.value===s.sort)) $("sort").value=s.sort;
   st.cats=new Set(s.cats||[]); st.picked=new Set(s.picked||[]);
   const r=document.querySelector(`input[name=slot][value=${s.slot==="any"?"any":"main"}]`); if(r) r.checked=true;
-  $("andCats").checked=!!s.and; $("hasX").checked=!!s.hasX; $("hasFC").checked=!!s.hasFC; $("newOnly").checked=!!s.newOnly; $("nowOnline").checked=!!s.nowOnline;
+  $("andCats").checked=!!s.and; $("hasX").checked=!!s.hasX; $("hasFC").checked=!!s.hasFC; $("newOnly").checked=!!s.newOnly; $("nowOnline").checked=!!s.nowOnline; $("favOnly").checked=!!s.favOnly; $("staleOnly").checked=!!s.staleOnly;
 }catch(_e){} }
 
 window.__nsBooted = true;
@@ -997,7 +1126,7 @@ function openProfile(m, keepScroll){
       ${wIcon(m.main,m.mainCat,"lg")}
       <div style="min-width:0">
         <div class="pf-name">${esc(m.name)}</div>
-        <div class="pf-sub">${getMe()===m.key?'<span class="tag me-tag">自分</span>':""}${m.mainCat?`<span class="tag">${m.mainCat}使い</span>`:""}${winsOf(m)?`<span class="tag tag-win">${TROPHY_SVG}優勝 ${winsOf(m)}回</span>`:""}${isNew?'<span class="tag">NEW</span>':""}${date?`<span>${date} 登録</span>`:""}${m.updTs && m.updTs!==m.ts ? `<span>・${new Date(m.updTs).toLocaleDateString("ja-JP",{year:"numeric",month:"numeric",day:"numeric"})} 更新</span>`:""}</div>
+        <div class="pf-sub">${getMe()===m.key?'<span class="tag me-tag">自分</span>':""}${isFav(m)?'<span class="tag">★ お気に入り</span>':""}${m.mainCat?`<span class="tag">${m.mainCat}使い</span>`:""}${winsOf(m)?`<span class="tag tag-win">${TROPHY_SVG}優勝 ${winsOf(m)}回</span>`:""}${isNew?'<span class="tag">NEW</span>':""}${date?`<span>${date} 登録</span>`:""}${m.updTs && m.updTs!==m.ts ? `<span>・${new Date(m.updTs).toLocaleDateString("ja-JP",{year:"numeric",month:"numeric",day:"numeric"})} 更新</span>`:""}${isStale(m)?`<span class="tag tag-stale">最終更新から${staleDays(m)}日</span>`:""}</div>
       </div>
     </div>
     <div class="pf-contact">
@@ -1042,7 +1171,11 @@ function openProfile(m, keepScroll){
       ${sameTime.length?`<div class="sub-h">浮上時間帯が近い人</div><div class="people">${sameTime.map(personChip).join("")}</div>`:""}
       ${near.length?`<div class="sub-h">パワーが近い人</div><div class="people">${near.map(personChip).join("")}</div>`:""}
     </div>
+    ${updateSection(m)}
     <div class="pf-actions">
+      <button data-act="fav">${isFav(m)?"★ お気に入りから外す":"☆ お気に入りに追加"}</button>
+      <button data-act="card">プロフィール画像を作る</button>
+      ${getMe() && getMe()!==m.key && members.some(x=>x.key===getMe()) ? '<button data-act="cmpme">自分と比較</button>' : ''}
       <button data-act="copy">プロフィールをコピー</button>
       <button data-act="me">${getMe()===m.key?"「自分」の設定を外す":"これは自分です"}</button>
       <button data-act="pick">${st.picked.has(m.key)?"選択を外す":"名簿で選択する"}</button>
@@ -1056,7 +1189,7 @@ function openProfile(m, keepScroll){
 }
 function closeProfile(fromPop){
   if(!fromPop && GH){ try{ GH.push({}, null, ""); }catch(_e){} }
-  pfShown = false; cur=null; $("pfback").classList.remove("show","scrolled"); $("pfback").classList.remove("show"); document.body.classList.remove("pf-open"); }
+  pfShown = false; cur=null; $("pfback").classList.remove("show","scrolled"); $("pfback").classList.remove("show"); if(!tlOpen()) document.body.classList.remove("pf-open"); }
 if(GH) GH.setChangeHandler(e=>{
   const n = e && e.state && e.state.pf, m = n && members.find(x=>x.key===norm(n));
   if(m){ navFromHandler = true; openProfile(m); navFromHandler = false; } else if(cur) closeProfile(true);
@@ -1076,13 +1209,17 @@ $("pfback").addEventListener("click", e=>{
   const c = t.closest("[data-copy]"); if(c){ copy(c.dataset.copy, "フレンドコードをコピーしました"); return; }
   const w = t.closest(".wtile[data-w]"); if(w){ closeProfile(); $("q").value = w.dataset.w; render(); $("q").scrollIntoView({block:"center"}); return; }
   const act = t.closest("[data-act]"); if(act){
+    if(act.dataset.act==="form"){ openForm(cur); return; }
+    if(act.dataset.act==="fav"){ toggleFav(cur.key); openProfile(cur, true); return; }
+    if(act.dataset.act==="card"){ makeCard(cur); return; }
+    if(act.dataset.act==="cmpme"){ const me = members.find(x=>x.key===getMe()); if(me) openCompare(me, cur); return; }
     if(act.dataset.act==="me"){ setMe(getMe()===cur.key ? "" : cur.key); openProfile(cur, true); toast(getMe() ? "自分として設定しました" : "設定を外しました"); return; }
     if(act.dataset.act==="copy") copy([`${cur.name}（最高パワー ${cur.power||"–"}・${cur.rank}位）`, `メイン：${cur.main||"–"}${cur.mainCat?`（${cur.mainCat}）`:""}`, `サブ：${[cur.sub1,cur.sub2].filter(Boolean).join(" / ")||"–"}`, cur.other?`その他：${cur.other}`:"", cur.xRaw?`X：${cur.xRaw}`:"", cur.fc?`フレコ：${cur.fc}`:""].filter(Boolean).join("\n"), "プロフィールをコピーしました");
     else { st.picked.has(cur.key) ? st.picked.delete(cur.key) : st.picked.add(cur.key); render(); openProfile(cur, true); }
   }
 });
 document.addEventListener("keydown", e=>{
-  if(!cur) return;
+  if(!cur){ if(e.key==="Escape" && tlOpen()) closeTool(); return; }
   if(e.key==="Escape") closeProfile();
   if(e.key==="ArrowRight"||e.key==="ArrowLeft"){ const m = members[members.indexOf(cur)+(e.key==="ArrowRight"?1:-1)]; if(m) openProfile(m); }
 });
@@ -1237,8 +1374,429 @@ function onRosterData(){
   if(cur){ const m = members.find(x=>x.key===cur.key); m ? openProfile(m, true) : closeProfile(); }
   else if(startHash.startsWith("p=")){ const k = norm(decodeURIComponent(startHash.slice(2))); startHash = ""; const m = members.find(x=>x.key===k); if(m) openProfile(m); }
   if($("sugg").classList.contains("show")) updateSugg();
+  if(typeof onToolsData==="function") onToolsData();
 }
 loadImages(); setInterval(loadImages, 10*60000);
+</script>
+<script>
+/* =====================================================================
+   追加機能：更新フォーム・お気に入り・情報が古い人・最近の動き・XPが伸びた人
+            サーバー統計・チーム分け・浮上時間の重なり・2人を比較・プロフィール画像
+   ===================================================================== */
+
+/* ---------- 登録・更新フォーム ---------- */
+const FORM_URL = "https:\/\/forms.gle/5aoY9MAGdyVghyTU6";
+let FORM_PREFILL = "";   /* 名前欄が入力済みのフォームURL（Apps Script から届く。届かなければ空） */
+function setFormInfo(f){ FORM_PREFILL = (f && f.prefill) ? String(f.prefill) : ""; }
+$("formLink").href = FORM_URL;
+function formUrlFor(m){ return (m && FORM_PREFILL) ? FORM_PREFILL.split("NSNAMEPLACEHOLDER").join(encodeURIComponent(m.name)) : FORM_URL; }
+function openForm(m){
+  if(m && !FORM_PREFILL) copy(m.name, "名前をコピーしました。フォームの名前欄に貼り付けてください");
+  window.open(formUrlFor(m), "_blank", "noopener");
+}
+function updateSection(m){
+  return `<div class="pf-sec pf-upd"><h3>情報の更新</h3>
+    <p>XP・ブキ・浮上時間帯などが変わったら、フォームで<b>変わった項目だけ</b>回答してください。空欄の項目は今の内容のまま残ります（消したい項目は「なし」と入力）。</p>
+    <button class="primary" data-act="form">${FORM_PREFILL ? "名前入りの更新フォームを開く" : "更新フォームを開く（名前をコピーします）"}</button>
+    ${m.updTs ? `<small>最終更新 ${fmtD(m.updTs, true)}${isStale(m) ? `（${staleDays(m)}日前）` : ""}</small>` : ""}</div>`;
+}
+
+/* ---------- お気に入り（この端末に保存） ---------- */
+const FAV_KEY = "nsFav";
+let FAVS = new Set();
+try{ FAVS = new Set(JSON.parse(localStorage.getItem(FAV_KEY) || "[]")); }catch(_e){}
+function isFav(m){ return FAVS.has(m.key); }
+function toggleFav(k){
+  if(FAVS.has(k)) FAVS.delete(k); else FAVS.add(k);
+  try{ localStorage.setItem(FAV_KEY, JSON.stringify(Array.from(FAVS))); }catch(_e){}
+  toast(FAVS.has(k) ? "お気に入りに追加しました（一覧の上に表示されます）" : "お気に入りから外しました");
+  render();
+}
+
+/* ---------- 情報が古い人 ---------- */
+const STALE_DAYS = 90;
+function staleDays(m){ return m.updTs ? Math.floor((Date.now() - m.updTs) / DAY) : 0; }
+function isStale(m){ return !!m.updTs && staleDays(m) >= STALE_DAYS; }
+
+/* ---------- ツール用の画面（共通） ---------- */
+let tlRender = null, tlSkipPop = false;
+function tlOpen(){ return $("tlback").classList.contains("show"); }
+function openTool(title, sub, bodyFn){
+  tlRender = function(){
+    $("tl").innerHTML = `<div class="tl-head"><div><h2>${title}</h2>${sub ? `<small>${sub}</small>` : ""}</div><button data-tlclose aria-label="閉じる">✕ 閉じる</button></div><div class="tl-body">${bodyFn()}</div>`;
+  };
+  tlRender();
+  const was = tlOpen();
+  $("tlback").classList.add("show"); document.body.classList.add("pf-open");
+  if(!was){ $("tlback").scrollTop = 0; try{ history.pushState({tool:1}, ""); }catch(_e){} }
+}
+function closeTool(fromPop){
+  if(!tlOpen()) return;
+  $("tlback").classList.remove("show"); tlRender = null;
+  if(!cur) document.body.classList.remove("pf-open");
+  if(!fromPop && history.state && history.state.tool){ tlSkipPop = true; try{ history.back(); }catch(_e){ tlSkipPop = false; } }
+}
+addEventListener("popstate", e=>{
+  if(tlSkipPop){ tlSkipPop = false; return; }
+  const s = e.state || {};
+  if(!s.tool && tlOpen()) closeTool(true);
+});
+const TL_ACTS = {};
+$("tlback").addEventListener("click", e=>{
+  const t = e.target;
+  if(t === $("tlback") || t.closest("[data-tlclose]")) return closeTool();
+  const p = t.closest(".person[data-key],.tm[data-key],.cmp-c[data-key]");
+  if(p){ const m = members.find(x=>x.key===p.dataset.key); if(m){ closeTool(true); openProfile(m); } return; }
+  const a = t.closest("[data-tl]");
+  if(a && TL_ACTS[a.dataset.tl]) TL_ACTS[a.dataset.tl](a);
+});
+$("tlback").addEventListener("change", e=>{ const a = e.target.closest("[data-tlc]"); if(a && TL_ACTS[a.dataset.tlc]) TL_ACTS[a.dataset.tlc](a); });
+const segBtns = (act, list, curV) => `<span class="seg">${list.map(o=>`<button data-tl="${act}" data-v="${o[0]}" class="${String(o[0])===String(curV)?'on':''}">${o[1]}</button>`).join("")}</span>`;
+const dLong = t => new Date(t).toLocaleDateString("ja-JP", {year:"numeric", month:"numeric", day:"numeric", weekday:"short"});
+
+/* ---------- 最近の動き（新規登録・更新） ---------- */
+const F_LABEL = {power:"XP", main:"メイン", sub1:"サブ1", sub2:"サブ2", other:"その他ブキ", x:"X ID", fc:"フレコ", sched:"浮上時間帯"};
+let recentDays = 14;
+function recentEvents(days){
+  const since = Date.now() - days*DAY, out = [];
+  members.forEach(m=>(m.log || []).forEach((e, i)=>{ if(e.ts && e.ts >= since) out.push({m: m, ts: e.ts, isNew: i===0, changes: e.changes}); }));
+  return out.sort((a,b)=>b.ts-a.ts);
+}
+function changeText(c){
+  if(c.f==="power") return `<span>XP ${c.from ? esc(c.from) + " → " : ""}<b>${esc(c.to) || "削除"}</b></span>`;
+  if(c.f==="main" || c.f==="sub1" || c.f==="sub2") return `<span>${F_LABEL[c.f]} ${c.to ? `→ <b>${esc(c.to)}</b>` : "を削除"}</span>`;
+  if(c.f==="sched") return `<span>浮上時間帯を更新</span>`;
+  return `<span>${F_LABEL[c.f]}を${c.to ? "更新" : "削除"}</span>`;
+}
+function recentBody(){
+  const ev = recentEvents(recentDays);
+  let html = `<div class="row">${segBtns("rdays", [[7,"7日"],[14,"14日"],[30,"30日"]], recentDays)}<span class="tsum">新規 <b>${ev.filter(x=>x.isNew).length}</b> 件・更新 <b>${ev.filter(x=>!x.isNew).length}</b> 件</span></div>`;
+  if(!ev.length) return html + `<div class="pf-sec"><div class="tl-empty">この期間の登録・更新はありません</div></div>`;
+  let lastDay = "", list = "";
+  ev.forEach(x=>{
+    const day = new Date(x.ts).toDateString();
+    if(day !== lastDay){ list += `<div class="tl-date">${dLong(x.ts)}</div>`; lastDay = day; }
+    const detail = x.isNew
+      ? `<span>${esc(x.m.main) || "メインブキ未登録"}</span><span>XP <b>${x.m.power || "–"}</b></span>`
+      : (x.changes.length ? x.changes.map(changeText).join("") : "<span>変更なし（同じ内容で回答）</span>");
+    list += `<div class="tl-row">${personChip(x.m)}<span class="bdg ${x.isNew?'new':'upd'}">${x.isNew?'新規登録':'更新'}</span><div class="grow chg">${detail}</div></div>`;
+  });
+  return html + `<div class="pf-sec">${list}</div>`;
+}
+TL_ACTS.rdays = a=>{ recentDays = +a.dataset.v; tlRender(); };
+function openRecent(){ openTool("最近の動き", "名簿への新規登録と情報の更新", recentBody); }
+
+/* ---------- XPが伸びた人 ---------- */
+let growthMode = "prev";
+function growthList(mode){
+  return members.map(m=>{
+    const h = xpRecords(m); if(h.length < 2) return null;
+    const a = mode==="prev" ? h[h.length-2] : h[0], b = h[h.length-1];
+    return {m: m, from: a, to: b, d: b.power - a.power};
+  }).filter(x=>x && x.d > 0).sort((x,y)=>y.d-x.d || y.to.ts-x.to.ts);
+}
+function growthBody(){
+  const list = growthList(growthMode);
+  const head = `<div class="row">${segBtns("gmode", [["prev","前回の記録から"],["all","最初の記録から"]], growthMode)}</div>`;
+  if(!list.length) return head + `<div class="pf-sec"><div class="tl-empty">まだXPが伸びた記録がありません。<br>フォームでXPを更新すると、ここに並びます。</div></div>`;
+  const d = p => p.early ? "10/1" : fmtD(p.ts);
+  return head + `<div class="pf-sec">${list.slice(0, 30).map((x,i)=>`<div class="tl-row"><span class="tl-rk">${i+1}</span>${personChip(x.m)}<span class="grow gft">${x.from.power} → <b>${x.to.power}</b>　<small class="date">${d(x.from)}〜${d(x.to)}</small></span><span class="gup">+${fmt(x.d)}</span></div>`).join("")}</div>`;
+}
+TL_ACTS.gmode = a=>{ growthMode = a.dataset.v; tlRender(); };
+function openGrowth(){ openTool("XPが伸びた人", "XPの記録が2回以上ある人の伸び幅ランキング", growthBody); }
+
+/* ---------- 情報が古い人 ---------- */
+function staleBody(){
+  const list = members.filter(isStale).sort((a,b)=>a.updTs-b.updTs);
+  if(!list.length) return `<div class="pf-sec"><div class="tl-empty">最終更新から${STALE_DAYS}日以上たっている人はいません</div></div>`;
+  return `<div class="pf-sec"><p>最終更新から${STALE_DAYS}日以上たっている人です。更新の呼びかけなどに使えます。</p>
+    <div class="tbtns" style="margin-bottom:6px"><button data-tl="staleCopy">名前をまとめてコピー</button><button data-tl="stalePick">この人たちを名簿で選択</button></div>
+    ${list.map(m=>`<div class="tl-row">${personChip(m)}<span class="grow gft">最終更新 ${fmtD(m.updTs, true)}</span><span class="bdg upd">${staleDays(m)}日前</span></div>`).join("")}</div>`;
+}
+TL_ACTS.staleCopy = ()=>copy(members.filter(isStale).map(m=>m.name).join("\n"), "名前をコピーしました");
+TL_ACTS.stalePick = ()=>{ members.filter(isStale).forEach(m=>st.picked.add(m.key)); render(); toast("選択しました"); };
+function openStale(){ openTool("情報が古い人", "", staleBody); }
+
+/* ---------- 浮上時間のヒートマップ（統計・重なりで共通） ---------- */
+const DAY_ORDER = [1,2,3,4,5,6,0];
+let hgList = [], hgAll = false;
+function heatGrid(list, markAll){
+  hgList = list.filter(m=>m.sched); hgAll = markAll;
+  const N = hgList.length; if(!N) return `<div class="xp-note">浮上時間帯の回答がありません。</div>`;
+  let mx = 1; const cnt = {};
+  DAY_ORDER.forEach(d=>SLOTS.forEach((_,i)=>{ const n = hgList.filter(m=>m.sched[d].indexOf(i)>=0).length; cnt[d+"_"+i] = n; if(n > mx) mx = n; }));
+  const cols = "26px " + SLOT_W.map(w=>w+"fr").join(" ");
+  let h = `<div class="hg" style="grid-template-columns:${cols}"><span></span>${SLOTS.map(sl=>`<span class="hh">${sl[0]}-${sl[1]}</span>`).join("")}`;
+  DAY_ORDER.forEach(d=>{
+    h += `<span class="hd${d===0?' sun':d===6?' sat':''}">${DAYS[d]}</span>`;
+    SLOTS.forEach((sl,i)=>{
+      const n = cnt[d+"_"+i], p = Math.round(n/mx*85);
+      h += `<button class="hc${n===0?' zero':''}${p>50?' dk':''}${markAll && n===N && N>1?' all':''}" style="--p:${p}%" data-tl="hcell" data-d="${d}" data-i="${i}" title="${DAYS[d]} ${sl[0]}〜${sl[1]}時：${n}人">${n}</button>`;
+    });
+  });
+  return h + `</div><div class="hg-detail" id="hgDetail"><span class="tsum">マスを押すと、その時間に浮上している人が表示されます</span></div>`;
+}
+TL_ACTS.hcell = a=>{
+  const d = +a.dataset.d, i = +a.dataset.i, sl = SLOTS[i];
+  document.querySelectorAll(".hc.sel").forEach(x=>x.classList.remove("sel")); a.classList.add("sel");
+  const on = hgList.filter(m=>m.sched[d].indexOf(i)>=0), off = hgList.filter(m=>m.sched[d].indexOf(i)<0);
+  $("hgDetail").innerHTML = `<b>${DAYS[d]}曜 ${sl[0]}〜${sl[1]}時</b>：${on.length}人
+    ${on.length ? `<div class="sub-h">浮上している人</div><div class="people">${on.map(personChip).join("")}</div>` : ""}
+    ${hgAll && off.length ? `<div class="sub-h">いない人</div><div class="people">${off.map(personChip).join("")}</div>` : ""}`;
+};
+
+/* ---------- サーバー統計 ---------- */
+function statsBody(){
+  const pw = members.map(m=>m.power).filter(Boolean);
+  const answered = members.filter(m=>m.sched).length;
+  const kp = `<div class="kpis">
+    <div><div class="k">登録人数</div><div class="v">${members.length}</div></div>
+    <div><div class="k">平均XP</div><div class="v">${fmt(avg(pw))}</div></div>
+    <div><div class="k">中央値</div><div class="v">${fmt(median(pw))}</div></div>
+    <div><div class="k">最高</div><div class="v">${pw.length ? Math.max.apply(null, pw) : "–"}</div></div>
+    <div><div class="k">浮上時間帯の回答</div><div class="v">${answered}人</div></div></div>`;
+  const rows = CATS.map(c=>({c: c, main: members.filter(m=>m.mainCat===c).length, any: members.filter(m=>m.allCats.indexOf(c)>=0).length}));
+  const mx = Math.max.apply(null, rows.map(r=>r.any).concat([1]));
+  const bars = rows.sort((a,b)=>b.main-a.main || b.any-a.any).map(r=>`<div class="cb-row"><span>${wIcon("", r.c, "xs")}${r.c}</span><div class="cb-track" style="--cc:${catVar(r.c)}"><i class="any" style="width:${r.any/mx*100}%"></i><i style="width:${r.main/mx*100}%"></i></div><span class="cb-n"><b>${r.main}</b>人 / ${r.any}</span></div>`).join("");
+  const wc = {}; members.forEach(m=>{ if(m.main){ const k = m.main; wc[k] = (wc[k]||0) + 1; } });
+  const top = Object.keys(wc).map(k=>[k, wc[k]]).sort((a,b)=>b[1]-a[1]).slice(0, 10);
+  const tmx = top.length ? top[0][1] : 1;
+  const tops = top.map(t=>`<div class="cb-row"><span style="overflow:hidden;text-overflow:ellipsis">${wIcon(t[0], catOf(t[0]), "xs")}${esc(t[0])}</span><div class="cb-track" style="--cc:${catVar(catOf(t[0]))}"><i style="width:${t[1]/tmx*100}%"></i></div><span class="cb-n"><b>${t[1]}</b>人</span></div>`).join("");
+  return kp +
+    `<div class="pf-sec"><h3>ブキ種ごとの人数</h3><p>濃い色＝メインブキの人数、うすい色＝サブも含めて扱える人数</p>${bars}</div>` +
+    `<div class="pf-sec"><h3>よく使われているメインブキ</h3>${tops || '<div class="xp-note">データがありません</div>'}</div>` +
+    `<div class="pf-sec"><h3>XPの分布（100ごと）</h3>${histogram({power: 0})}</div>` +
+    `<div class="pf-sec"><h3>曜日・時間帯ごとの浮上人数</h3><p>色が濃いほど人が多い時間帯です（回答した${answered}人の集計）</p>${heatGrid(members, false)}</div>`;
+}
+function openStats(){ openTool("サーバー統計", "名簿全体の集計", statsBody); }
+
+/* ---------- 選択メンバー ---------- */
+function selList(){ return members.filter(m=>st.picked.has(m.key)); }
+
+/* ---------- 浮上時間の重なり ---------- */
+function overlapBody(){
+  const sel = selList(), has = sel.filter(m=>m.sched), miss = sel.filter(m=>!m.sched), N = has.length;
+  let sum = "";
+  if(N >= 2){
+    const lines = DAY_ORDER.map(d=>{ const idx = SLOTS.map((_,i)=>i).filter(i=>has.every(m=>m.sched[d].indexOf(i)>=0)); return idx.length ? `<span><b>${DAYS[d]}</b>${rangesText(idx)}</span>` : ""; }).filter(Boolean);
+    if(lines.length) sum = `<div class="hg-sum"><span class="sc-on" style="justify-self:start">${N}人全員がそろう時間帯</span>${lines.join("")}</div>`;
+    else {
+      const cells = []; DAY_ORDER.forEach(d=>SLOTS.forEach((sl,i)=>{ const n = has.filter(m=>m.sched[d].indexOf(i)>=0).length; if(n) cells.push({d: d, i: i, n: n}); }));
+      cells.sort((a,b)=>b.n-a.n || (SLOTS[b.i][1]-SLOTS[b.i][0]) - (SLOTS[a.i][1]-SLOTS[a.i][0]));
+      sum = `<div class="hg-sum"><span class="tsum">全員がそろう時間帯はありませんでした。多くそろう時間帯：</span>${cells.slice(0, 5).map(c=>`<span><b>${DAYS[c.d]} ${SLOTS[c.i][0]}〜${SLOTS[c.i][1]}時</b>${c.n}/${N}人（いない人：${has.filter(m=>m.sched[c.d].indexOf(c.i)<0).map(m=>esc(m.name)).join("、")}）</span>`).join("")}</div>`;
+    }
+  }
+  return `<div class="pf-sec"><h3>選択中の${sel.length}人</h3><div class="people">${sel.map(personChip).join("")}</div>
+      ${miss.length ? `<div class="sub-h">浮上時間帯が未回答（集計に入っていません）：${miss.map(m=>esc(m.name)).join("、")}</div>` : ""}</div>
+    <div class="pf-sec"><h3>曜日・時間帯ごとの人数</h3>${N < 2 ? '<div class="xp-note">浮上時間帯を回答している人を2人以上選んでください。</div>' : sum + heatGrid(has, true) + '<div class="lg"><span><i style="box-shadow:inset 0 0 0 2px #16a34a"></i>全員そろう</span><span>数字＝浮上している人数</span></div>'}</div>`;
+}
+function openOverlap(){ openTool("浮上時間の重なり", "練習日・試合日程を決めるときに", overlapBody); }
+
+/* ---------- 自動チーム分け ---------- */
+const teamOpt = { size: 4, charger: true, cats: true };
+let teamRes = null;
+function teamPower(list){ const p = list.map(m=>m.power).filter(Boolean); const a = p.length ? avg(p) : 0; return m => m.power || a; }
+function teamScore(teams, pv){
+  const avgs = teams.map(t=>avg(t.map(pv)));
+  let sc = Math.max.apply(null, avgs) - Math.min.apply(null, avgs);
+  teams.forEach(t=>{
+    const c = {}; t.forEach(m=>{ if(m.mainCat) c[m.mainCat] = (c[m.mainCat]||0) + 1; });
+    Object.keys(c).forEach(k=>{ const n = c[k]-1; if(n > 0){ if(k==="チャージャー" && teamOpt.charger) sc += 400*n; else if(teamOpt.cats) sc += 60*n; } });
+  });
+  return sc;
+}
+function makeTeams(list){
+  const pv = teamPower(list), n = list.length;
+  const T = Math.max(2, Math.round(n / teamOpt.size));
+  const runs = n > 24 ? 24 : 50, cands = [];
+  for(let run=0; run<runs; run++){
+    const arr = list.map(m=>[m, pv(m) + (Math.random()-.5)*160]).sort((a,b)=>b[1]-a[1]).map(x=>x[0]);
+    const teams = []; for(let i=0; i<T; i++) teams.push([]);
+    arr.forEach((m,i)=>{ const r = Math.floor(i/T), c = i%T; teams[r%2 ? T-1-c : c].push(m); });
+    let sc = teamScore(teams, pv), improved = true, guard = 0;
+    while(improved && guard++ < 30){
+      improved = false;
+      for(let a=0; a<T; a++) for(let b=a+1; b<T; b++) for(let i=0; i<teams[a].length; i++) for(let j=0; j<teams[b].length; j++){
+        const x = teams[a][i], y = teams[b][j]; teams[a][i] = y; teams[b][j] = x;
+        const s2 = teamScore(teams, pv);
+        if(s2 < sc - 1e-9){ sc = s2; improved = true; } else { teams[a][i] = x; teams[b][j] = y; }
+      }
+    }
+    cands.push({sc: sc, teams: teams});
+  }
+  cands.sort((a,b)=>a.sc-b.sc);
+  const best = cands[0].sc, ok = cands.filter(c=>c.sc <= best + Math.max(15, best*0.15));
+  const pick = ok[Math.floor(Math.random()*ok.length)];
+  return { teams: pick.teams.map(t=>t.slice().sort((a,b)=>b.power-a.power)), pv: pv };
+}
+const TEAM_NAMES = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+function teamBody(){
+  const sel = selList();
+  if(sel.length < 4) return `<div class="pf-sec"><div class="tl-empty">チーム分けには4人以上選んでください（今は${sel.length}人）</div></div>`;
+  if(!teamRes || teamRes.n !== sel.length || teamRes.keys !== sel.map(m=>m.key).join("|")){ const r = makeTeams(sel); teamRes = {teams: r.teams, pv: r.pv, n: sel.length, keys: sel.map(m=>m.key).join("|")}; }
+  const pv = teamRes.pv, teams = teamRes.teams;
+  const avgs = teams.map(t=>avg(t.map(pv))), spread = Math.max.apply(null, avgs) - Math.min.apply(null, avgs);
+  const sizes = teams.map(t=>t.length), uneven = Math.max.apply(null, sizes) !== Math.min.apply(null, sizes);
+  const opts = `<div class="pf-sec"><div class="topts">
+      <label>1チーム <select data-tlc="tsize">${[2,3,4,5,6,8].map(v=>`<option value="${v}"${v===teamOpt.size?' selected':''}>${v}人</option>`).join("")}</select></label>
+      <label class="check"><input type="checkbox" data-tlc="tcharger"${teamOpt.charger?' checked':''}> チャージャーは1チーム1人まで</label>
+      <label class="check"><input type="checkbox" data-tlc="tcats"${teamOpt.cats?' checked':''}> 同じブキ種がなるべく重ならないように</label>
+    </div></div>`;
+  const sumL = `<div class="tsum">${sel.length}人 → <b>${teams.length}</b>チーム・平均XPの差 最大 <b>${fmt(spread)}</b>${uneven ? "（人数が割り切れないため、人数の少ないチームがあります）" : ""}${sel.some(m=>!m.power) ? "・XP未登録の人は選択メンバーの平均として計算" : ""}</div>`;
+  const cards = teams.map((t,i)=>`<div class="team"><h4>チーム${TEAM_NAMES[i]}<span>平均 ${fmt(avgs[i])}・合計 ${fmt(t.map(pv).reduce((a,b)=>a+b,0))}</span></h4>${t.map(m=>`<div class="tm" data-key="${esc(m.key)}">${wIcon(m.main, m.mainCat, "sm")}<span class="tmn"><b>${esc(m.name)}</b><small>${esc(m.main) || "–"}</small></span><span class="p">${m.power || "–"}</span></div>`).join("")}</div>`).join("");
+  return opts + `<div class="tbtns"><button class="primary" data-tl="treroll">別の組み合わせにする</button><button data-tl="tcopy">Discord用にコピー</button></div>` + sumL + `<div class="teams">${cards}</div>`;
+}
+function teamText(){
+  if(!teamRes) return "";
+  return teamRes.teams.map((t,i)=>`【チーム${TEAM_NAMES[i]}】平均 ${fmt(avg(t.map(teamRes.pv)))}\n` + t.map(m=>`・${m.name}（${m.main || "–"} / ${m.power || "–"}）`).join("\n")).join("\n\n");
+}
+TL_ACTS.treroll = ()=>{ teamRes = null; tlRender(); };
+TL_ACTS.tcopy = ()=>copy(teamText(), "チーム分けをコピーしました");
+TL_ACTS.tsize = a=>{ teamOpt.size = +a.value; teamRes = null; tlRender(); };
+TL_ACTS.tcharger = a=>{ teamOpt.charger = a.checked; teamRes = null; tlRender(); };
+TL_ACTS.tcats = a=>{ teamOpt.cats = a.checked; teamRes = null; tlRender(); };
+function openTeam(){ teamRes = null; openTool("自動チーム分け", "平均XPがなるべくそろうように分けます", teamBody); }
+
+/* ---------- 2人を比較 ---------- */
+let cmpPair = null;
+function cmpChart(a, b){
+  const ha = xpRecords(a), hb = xpRecords(b), all = ha.concat(hb);
+  if(!all.length) return `<div class="xp-note">XPの記録がありません。</div>`;
+  const now = Date.now(), t1 = now, t0 = Math.min(Math.min.apply(null, all.map(p=>p.ts)), now - 7*DAY);
+  let lo = Math.min.apply(null, all.map(p=>p.power)), hi = Math.max.apply(null, all.map(p=>p.power));
+  const span = Math.max(100, hi-lo), stp = span>600 ? 200 : span>250 ? 100 : 50;
+  lo = Math.floor((lo - span*0.15)/stp)*stp; hi = Math.ceil((hi + span*0.15)/stp)*stp;
+  const mob = isMobileView(), W = mob ? 360 : 640, H = mob ? 200 : 220, L = mob ? 40 : 46, R = 44, T = 16, B = 28;
+  const X = t => L + (t-t0)/(t1-t0)*(W-L-R), Y = v => T + (hi-v)/(hi-lo)*(H-T-B);
+  const grid = []; for(let v=lo; v<=hi; v+=stp) grid.push(`<line x1="${L}" x2="${W-R}" y1="${Y(v)}" y2="${Y(v)}"/><text x="${L-8}" y="${Y(v)+4}" text-anchor="end">${v}</text>`);
+  const xt = [0, .5, 1].map((f,i)=>`<text x="${X(t0+(t1-t0)*f)}" y="${H-8}" text-anchor="${i===0?'start':i===2?'end':'middle'}">${i===2 ? "今日" : fmtD(t0+(t1-t0)*f)}</text>`).join("");
+  const otherLast = (h, o) => o.length ? o[o.length-1].power : -1;
+  const line = (h, cls, o) => {
+    if(!h.length) return "";
+    const pts = h.map(p=>[X(p.ts), Y(p.power)]), lp = pts[pts.length-1], v = h[h.length-1].power;
+    const above = v >= otherLast(h, o);
+    const d = pts.map((p,i)=>(i?"L":"M")+p[0].toFixed(1)+","+p[1].toFixed(1)).join("");
+    return `<g class="${cls}">${pts.length>1?`<path class="cl" d="${d}"/>`:""}<line class="cl dash" x1="${lp[0].toFixed(1)}" y1="${lp[1].toFixed(1)}" x2="${X(now).toFixed(1)}" y2="${lp[1].toFixed(1)}"/>${pts.map(p=>`<circle class="cp" cx="${p[0].toFixed(1)}" cy="${p[1].toFixed(1)}" r="4"/>`).join("")}<text class="ct" x="${(X(now)+4).toFixed(1)}" y="${(lp[1] + (above ? -4 : 14)).toFixed(1)}">${v}</text></g>`;
+  };
+  return `<div class="xpc"><svg viewBox="0 0 ${W} ${H}" role="img" aria-label="XPの推移の比較"><g class="grid ax">${grid.join("")}</g><g class="ax">${xt}</g>${line(ha, "cmpA", hb)}${line(hb, "cmpB", ha)}</svg></div>
+    <div class="lg"><span class="cmpA"><i style="background:var(--k)"></i>${esc(a.name)}</span><span class="cmpB"><i style="background:var(--k)"></i>${esc(b.name)}</span></div>`;
+}
+function cmpSched(a, b){
+  if(!a.sched || !b.sched) return `<div class="xp-note">${!a.sched && !b.sched ? "2人とも" : esc((!a.sched ? a : b).name) + " さんが"}浮上時間帯を未回答です。</div>`;
+  const lines = SLOTS.slice(1).map(sl=>`<u style="left:${tpos(sl[0])}%"></u>`).join("");
+  let both = 0;
+  const rows = DAY_ORDER.map(d=>{
+    const blocks = SLOTS.map((sl,i)=>{
+      const x = a.sched[d].indexOf(i)>=0, y = b.sched[d].indexOf(i)>=0; if(!x && !y) return "";
+      if(x && y) both += sl[1]-sl[0];
+      return `<i class="${x&&y?'both':x?'oa':'ob'}" style="left:${tpos(sl[0])}%;width:${tpos(sl[1])-tpos(sl[0])}%" title="${DAYS[d]} ${sl[0]}〜${sl[1]}時"></i>`;
+    }).join("");
+    return `<div class="sc-row"><span class="sc-d${d===0?' sun':d===6?' sat':''}">${DAYS[d]}</span><div class="sc-track">${lines}${blocks}</div></div>`;
+  }).join("");
+  const axis = `<div class="sc-row sc-axis"><span></span><div class="sc-track">${[0,3,6,17,19,21,24].map(h=>`<em style="left:${tpos(h)}%">${h}</em>`).join("")}</div></div>`;
+  return `<div class="sc-head"><span>重なり <b>${Math.round(schedOverlap(a,b)*100)}%</b></span><span>2人とも浮上：週 約${both}時間</span></div><div class="sc">${rows}${axis}</div>
+    <div class="lg"><span><i style="background:var(--accent)"></i>2人とも</span><span class="cmpA"><i style="background:color-mix(in srgb,var(--k) 45%,transparent)"></i>${esc(a.name)}だけ</span><span class="cmpB"><i style="background:color-mix(in srgb,var(--k) 45%,transparent)"></i>${esc(b.name)}だけ</span></div>`;
+}
+function compareBody(){
+  const a = members.find(m=>m.key===cmpPair[0]), b = members.find(m=>m.key===cmpPair[1]);
+  if(!a || !b) return `<div class="pf-sec"><div class="tl-empty">比較するメンバーが見つかりません</div></div>`;
+  const head = (m, cls) => `<div class="cmp-c ${cls}" data-key="${esc(m.key)}" style="--cc:${catVar(m.mainCat)}">${wIcon(m.main, m.mainCat, "md")}<div><b>${esc(m.name)}</b><small>${m.mainCat ? m.mainCat + "使い" : ""}</small></div></div>`;
+  const row = (k, va, vb, c) => `<div class="ck2">${k}</div><div class="cv${c>0?' win':''}">${va}</div><div class="cv${c<0?' win':''}">${vb}</div>`;
+  const wins = m => winsOf(m);
+  const date = t => t ? fmtD(t, true) : "–";
+  const g = `<div class="cmp-g">
+    ${row("最高パワー", a.power || "–", b.power || "–", (a.power||0) - (b.power||0))}
+    ${row("パワー順位", a.rank + "位", b.rank + "位", b.rank - a.rank)}
+    ${row("メイン", esc(a.main) || "–", esc(b.main) || "–", 0)}
+    ${row("サブ 1", esc(a.sub1) || "–", esc(b.sub1) || "–", 0)}
+    ${row("サブ 2", esc(a.sub2) || "–", esc(b.sub2) || "–", 0)}
+    ${row("扱えるブキ種", a.allCats.join("・") || "–", b.allCats.join("・") || "–", 0)}
+    ${row("大会優勝", wins(a) + "回", wins(b) + "回", wins(a) - wins(b))}
+    ${row("登録日", date(a.ts), date(b.ts), 0)}
+    ${row("最終更新", date(a.updTs), date(b.updTs), 0)}</div>`;
+  return `<div class="cmp-h">${head(a, "cmpA")}${head(b, "cmpB")}</div>
+    <div class="pf-sec"><h3>基本情報</h3>${g}</div>
+    <div class="pf-sec"><h3>XPの推移</h3>${cmpChart(a, b)}</div>
+    <div class="pf-sec"><h3>主な浮上時間帯</h3>${cmpSched(a, b)}</div>
+    <div class="tbtns"><button data-tl="cswap">左右を入れ替える</button></div>`;
+}
+TL_ACTS.cswap = ()=>{ cmpPair = [cmpPair[1], cmpPair[0]]; tlRender(); };
+function openCompare(a, b){ cmpPair = [a.key, b.key]; openTool("2人を比較", "", compareBody); }
+
+/* ---------- プロフィール画像（自己紹介などに） ---------- */
+function cssVar(n){ return getComputedStyle(document.documentElement).getPropertyValue(n).trim(); }
+function svgImg(inner, color){
+  return new Promise(res=>{
+    const svg = `<svg xmlns="http:\/\/www.w3.org/2000/svg" viewBox="0 0 32 32">${inner.split("currentColor").join(color)}</svg>`;
+    const im = new Image(); im.onload = ()=>res(im); im.onerror = ()=>res(null);
+    im.src = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svg);
+  });
+}
+function rr(ctx, x, y, w, h, r){ ctx.beginPath(); ctx.moveTo(x+r, y); ctx.arcTo(x+w, y, x+w, y+h, r); ctx.arcTo(x+w, y+h, x, y+h, r); ctx.arcTo(x, y+h, x, y, r); ctx.arcTo(x, y, x+w, y, r); ctx.closePath(); }
+function fitText(ctx, text, maxW, size, weight){
+  const FF = '"Hiragino Sans","Noto Sans JP","Yu Gothic UI",system-ui,sans-serif';
+  let s = size; do { ctx.font = `${weight} ${s}px ${FF}`; s -= 2; } while(ctx.measureText(text).width > maxW && s > 14);
+}
+function makeCard(m){
+  const color = cssVar("--c-" + (CAT_KEY[m.mainCat] || "none")) || "#5b3cf5";
+  const cv = document.createElement("canvas"); cv.width = 1200; cv.height = 630;
+  const ctx = cv.getContext("2d");
+  const go = function(icon){
+    ctx.fillStyle = color; ctx.fillRect(0, 0, 1200, 630);
+    const g = ctx.createLinearGradient(0, 0, 1200, 630); g.addColorStop(0, "rgba(0,0,0,0)"); g.addColorStop(1, "rgba(0,0,0,.5)");
+    ctx.fillStyle = g; ctx.fillRect(0, 0, 1200, 630);
+    ctx.fillStyle = "rgba(255,255,255,.08)"; ctx.beginPath(); ctx.arc(1110, 60, 260, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle = "rgba(255,255,255,.06)"; ctx.beginPath(); ctx.arc(960, 640, 200, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle = "#fff"; rr(ctx, 64, 64, 220, 220, 48); ctx.fill();
+    if(icon) ctx.drawImage(icon, 89, 89, 170, 170);
+    ctx.fillStyle = "#fff"; ctx.textBaseline = "alphabetic";
+    fitText(ctx, m.name, 820, 76, 800); ctx.fillText(m.name, 320, 150);
+    const tags = [m.mainCat ? m.mainCat + "使い" : "", winsOf(m) ? "大会優勝 " + winsOf(m) + "回" : ""].filter(Boolean).join("　・　");
+    fitText(ctx, tags, 820, 30, 600); ctx.globalAlpha = .9; ctx.fillText(tags, 322, 205); ctx.globalAlpha = 1;
+    if(m.x){ fitText(ctx, "X  @" + m.x, 820, 26, 600); ctx.globalAlpha = .85; ctx.fillText("X  @" + m.x, 322, 255); ctx.globalAlpha = 1; }
+    const pct = percentile(m);
+    const kp = [["最高パワー", String(m.power || "–")], ["パワー順位", m.rank + " / " + members.length], ["上位", pct != null ? pct + "%" : "–"]];
+    kp.forEach((k, i)=>{
+      const x = 64 + i*262, y = 320;
+      ctx.fillStyle = "rgba(255,255,255,.16)"; rr(ctx, x, y, 246, 118, 22); ctx.fill();
+      ctx.fillStyle = "#fff"; fitText(ctx, k[0], 210, 22, 600); ctx.globalAlpha = .85; ctx.fillText(k[0], x+22, y+40); ctx.globalAlpha = 1;
+      fitText(ctx, k[1], 210, 46, 800); ctx.fillText(k[1], x+22, y+96);
+    });
+    const wl = "メイン  " + (m.main || "–") + ([m.sub1, m.sub2].filter(Boolean).length ? "　／　サブ  " + [m.sub1, m.sub2].filter(Boolean).join("・") : "");
+    fitText(ctx, wl, 1070, 30, 700); ctx.fillText(wl, 66, 500);
+    if(m.sched){ const s = schedSummary(m).replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim(); if(s){ const t = "よく浮上する時間  " + s; fitText(ctx, t, 1070, 26, 600); ctx.globalAlpha = .9; ctx.fillText(t, 66, 548); ctx.globalAlpha = 1; } }
+    const foot = "メンバー名簿 ・ " + fmtD(Date.now(), true);
+    fitText(ctx, foot, 600, 20, 600); ctx.globalAlpha = .75; ctx.textAlign = "right"; ctx.fillText(foot, 1136, 598); ctx.textAlign = "left"; ctx.globalAlpha = 1;
+    cv.toBlob(function(blob){
+      if(!blob){ toast("画像を作れませんでした"); return; }
+      const url = URL.createObjectURL(blob), file = (typeof File === "function") ? new File([blob], m.name + "_プロフィール.png", {type: "image/png"}) : null;
+      const canShare = !!(file && navigator.canShare && navigator.canShare({files: [file]}));
+      TL_ACTS.cshare = ()=>{ navigator.share({files: [file], title: m.name}).catch(function(){}); };
+      openTool("プロフィール画像", "自己紹介やDiscordに貼るときに", ()=>`<img class="card-img" src="${url}" alt="${esc(m.name)}のプロフィール画像">
+        <div class="tbtns"><a class="tbtn tform" href="${url}" download="${esc(m.name)}_プロフィール.png">画像を保存</a>${canShare ? '<button class="tbtn" data-tl="cshare">共有する</button>' : ""}</div>
+        <div class="tsum">スマホでは画像を長押しして保存することもできます。ブキ画像は入らず、ブキ種のアイコンで表示されます。</div>`);
+    }, "image/png");
+  };
+  const run = () => svgImg(ICONS[CAT_KEY[m.mainCat] || "none"], color).then(go);
+  if(document.fonts && document.fonts.ready) document.fonts.ready.then(run); else run();
+}
+
+/* ---------- ボタンのつなぎ込み ---------- */
+$("tools").addEventListener("click", e=>{
+  const b = e.target.closest("[data-tool]"); if(!b) return;
+  if(!members.length){ toast("読み込み中です"); return; }
+  ({recent: openRecent, growth: openGrowth, stats: openStats, stale: openStale})[b.dataset.tool]();
+});
+$("selTeam").addEventListener("click", ()=>{ const n = selList().length; if(n < 4){ toast("チーム分けには4人以上選んでください（今は" + n + "人）"); return; } openTeam(); });
+$("selTime").addEventListener("click", ()=>{ const n = selList().length; if(n < 2){ toast("2人以上選んでください"); return; } openOverlap(); });
+$("selCmp").addEventListener("click", ()=>{ const l = selList(); if(l.length !== 2){ toast("比較する2人を選んでください（今は" + l.length + "人）"); return; } openCompare(l[0], l[1]); });
+function onToolsData(){
+  const rn = new Set(recentEvents(7).map(x=>x.m.key)).size;
+  $("recentN").textContent = rn ? String(rn) : "";
+  const sn = members.filter(isStale).length;
+  $("staleN").textContent = sn ? String(sn) : "";
+  if(tlOpen() && tlRender && !$("tl").querySelector(".card-img")) tlRender();
+}
 </script>
 </body>
 </html>
