@@ -23,6 +23,8 @@
   --gold:#e7bb2c;--silver:#b5bdc9;--bronze:#d98a4a;--new:#ff5fa2;
 }
 *{box-sizing:border-box}
+/* スマホのブラウザが長い文章だけ勝手に文字を大きくする機能（文字の自動拡大）を止める */
+html{-webkit-text-size-adjust:100%;-moz-text-size-adjust:100%;text-size-adjust:100%}
 body{margin:0;background:var(--bg);color:var(--ink);font-family:"Hiragino Sans","Noto Sans JP","Yu Gothic UI",system-ui,sans-serif;line-height:1.5}
 .wrap{max-width:1240px;margin:0 auto;padding:24px 16px 120px}
 header{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:12px;margin-bottom:18px}
