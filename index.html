@@ -220,7 +220,8 @@ body.pf-open{overflow:hidden}
 .xptip{position:absolute;pointer-events:none;background:var(--ink);color:var(--bg);font-size:.75rem;padding:5px 9px;border-radius:8px;white-space:nowrap;transform:translate(-50%,calc(-100% - 10px));opacity:0;transition:opacity .1s;z-index:2}
 .xptip b{font-size:.9rem;font-variant-numeric:tabular-nums}
 .xpc.hov .xptip{opacity:1}
-.xptip.below{transform:translate(-50%,14px)}
+.xptip{transform:translateY(calc(-100% - 10px))!important;box-sizing:border-box}
+.xptip.below{transform:translateY(14px)!important}
 .xptip{max-width:calc(100% - 4px);white-space:normal;text-align:center}
 .xptip br+b{white-space:nowrap}
 .xp-note{font-size:.8rem;color:var(--muted);margin-top:8px}
@@ -1336,9 +1337,11 @@ function xpHover(e){
   tip.innerHTML = d.today ? `今日<br><b>${d.power}</b>（最新の記録）`
     : `${d.early ? "2026/10/1（それ以前の記録）" : new Date(d.ts).toLocaleDateString("ja-JP",{year:"numeric",month:"numeric",day:"numeric"})}<br><b>${d.power}</b>${prev && !prev.today?`（${d.power-prev.power>=0?"+":""}${fmt(d.power-prev.power)}）`:""}`;
   /* 吹き出しがグラフの外にはみ出さないよう、実際の幅を測って左右・上下の位置を調整する */
-  const tw = tip.offsetWidth, th = tip.offsetHeight, half = tw/2 + 2;
-  const cx = tw + 4 >= r.width ? r.width/2 : Math.min(Math.max(p[0]*k, half), r.width - half);
-  tip.style.left = cx + "px"; tip.style.top = (p[1]*k) + "px";
+  tip.style.left = "0px";
+  const tw = Math.min(tip.offsetWidth, r.width), th = tip.offsetHeight;
+  /* 吹き出しの左端を px で直接決める（点を中心にしつつ、左右どちらにもはみ出さない） */
+  const lx = Math.max(0, Math.min(p[0]*k - tw/2, r.width - tw));
+  tip.style.left = lx + "px"; tip.style.top = (p[1]*k) + "px";
   tip.classList.toggle("below", p[1]*k < th + 12);
 }
 $("pf").addEventListener("pointermove", xpHover);
