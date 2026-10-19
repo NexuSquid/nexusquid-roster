@@ -1162,7 +1162,10 @@ const AW_OPEN = new Set();
 function awTs(a){ const p = String(a.date || "").normalize("NFKC").match(/(\d{4})\D+(\d{1,2})\D+(\d{1,2})/); return p ? new Date(+p[1], +p[2]-1, +p[3]).getTime() : 0; }
 function awardsSection(m){
   const list = awardsOf(m); if(!list.length) return "";
-  const sorted = list.slice().sort((a,b)=>(awTs(b)-awTs(a)) || a.idx-b.idx);   /* 日付が新しい順（日付なしは最後） */
+  /* 並び順：①優勝が上 → ②その中で日付が古い順（日付なしは最後） */
+  const order = {win:0, second:1, entry:2, other:3};
+  const dkey = a => awTs(a) || Infinity;
+  const sorted = list.slice().sort((a,b)=>(order[a.type]-order[b.type]) || (dkey(a)-dkey(b)) || a.idx-b.idx);
   const mate = n => { const k = norm(n), mm = members.find(x=>x.key===k); return mm ? `<span class="person mate" data-key="${esc(mm.key)}">${wIcon(mm.main,mm.mainCat,"sm")}<b>${esc(mm.name)}</b></span>` : `<span class="mate-off">${esc(n)}</span>`; };
   const rows = sorted.map(a=>{
     const t = awTs(a);
