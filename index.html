@@ -343,6 +343,19 @@ html.force-m tbody tr[data-key]{display:block!important;padding:0!important;marg
 .aw-win{border-color:color-mix(in srgb,#f4c430 45%,var(--line));background:color-mix(in srgb,#f4c430 8%,var(--surface))}
 .aw-t{min-width:0}.aw-t b{font-size:.92rem}
 .aw-m{display:flex;flex-wrap:wrap;align-items:center;gap:5px;margin-top:5px}
+/* ---- 指定色（シート「アイコン」C列） ---- */
+.pf.hasc .pf-sec{border-top:3px solid var(--mc)}
+.pf.hasc .sc-track i{background:var(--mc)}
+.pf.hasc .sc-row.today .sc-d{background:var(--mc)}
+.pf.hasc .catcell.on.main .wi{box-shadow:0 0 0 2px var(--mc)}
+.pf.hasc .hist .b.me{background:var(--mc)}
+.pf-hero.lt{color:#1b1d22}
+.pf-hero.lt::after,.pf-hero.lt::before{background:rgba(255,255,255,.25)}
+.pf-hero.lt .pf-top button,.pf-hero.lt .pf-contact a,.pf-hero.lt .pf-contact span{color:#1b1d22;background:rgba(255,255,255,.45);border-color:rgba(0,0,0,.15)}
+.pf-hero.lt .pf-sub .tag{background:rgba(0,0,0,.08)}
+.pf-hero.lt .pf-kpi{background:rgba(255,255,255,.45);border-color:rgba(0,0,0,.1)}
+#rows tr.hasc td.name{box-shadow:inset 4px 0 0 var(--mc)}
+#rows tr.hasc td.mcard{box-shadow:inset 4px 0 0 var(--mc)}
 .avw{position:relative;display:inline-block;flex:0 0 auto}
 .avw .av{display:block;width:100%;height:100%;border-radius:50%;object-fit:cover;background:var(--chip)}
 .avw .avb .wi{position:absolute!important;right:-4px;bottom:-4px;margin:0!important;box-shadow:0 0 0 2px var(--surface);background:var(--surface)!important}
@@ -881,12 +894,36 @@ function sorted(list){
 
 /* ---------- 描画 ---------- */
 /* ---------- 個人アイコン（GitHubの icons フォルダ／シート「アイコン」で名前とファイル名を対応づけ） ---------- */
-let ICON_MAP = {};
-function setIcons(list){
-  ICON_MAP = {};
-  (list || []).forEach(r=>{ const f = String(r[1] || "").trim(); if(!r[0] || !f) return;
-    ICON_MAP[norm(r[0])] = /^https:/.test(f) ? f : "icons/" + f.split("/").map(encodeURIComponent).join("/"); });
+let ICON_MAP = {}, COLOR_MAP = {};
+/* カラーコード（#ff5c8a / ff5c8a / #f58 など）を #rrggbb にそろえる。読めなければ空 */
+function normColor(c){
+  let t = String(c || "").normalize("NFKC").trim().replace(/^#/, "").toLowerCase();
+  if(/^[0-9a-f]{3}$/.test(t)) t = t.split("").map(x=>x+x).join("");
+  return /^[0-9a-f]{6}$/.test(t) ? "#" + t : "";
 }
+function setIcons(list){
+  ICON_MAP = {}; COLOR_MAP = {};
+  (list || []).forEach(r=>{ if(!r[0]) return; const k = norm(r[0]), f = String(r[1] || "").trim(), c = normColor(r[2]);
+    if(f) ICON_MAP[k] = /^https:/.test(f) ? f : "icons/" + f.split("/").map(encodeURIComponent).join("/");
+    if(c) COLOR_MAP[k] = c; });
+}
+function colorOf(m){ return (m && COLOR_MAP[m.key]) || ""; }
+/* 色を白に寄せて明るくする（t：0〜1） */
+function tint(hex, t){ const n = parseInt(hex.slice(1), 16), c = v => Math.round(v + (255-v)*t).toString(16).padStart(2, "0");
+  return "#" + c(n>>16&255) + c(n>>8&255) + c(n&255); }
+/* 指定色があれば、その色で個人ページなどを塗る。
+   base＝背景用（指定どおり）、acc＝線・バー用（明るすぎ／暗すぎる色だけ少し調整）、light＝背景が明るいので文字を黒にする */
+function memberTheme(m){
+  const c = colorOf(m); if(!c) return null;
+  const L = lum(c);
+  return { base: c, acc: L > .6 ? shade(c, .35) : L < .03 ? tint(c, .35) : c, light: L > .5 };
+}
+/* 色の明るさ（0＝黒〜1＝白） */
+function lum(hex){ const n = parseInt(hex.slice(1), 16), f = v => { v /= 255; return v <= .03928 ? v/12.92 : Math.pow((v+.055)/1.055, 2.4); };
+  return .2126*f(n>>16&255) + .7152*f(n>>8&255) + .0722*f(n&255); }
+/* 色を黒に寄せて暗くする（t：0〜1） */
+function shade(hex, t){ const n = parseInt(hex.slice(1), 16), c = v => Math.round(v*(1-t)).toString(16).padStart(2, "0");
+  return "#" + c(n>>16&255) + c(n>>8&255) + c(n&255); }
 function iconOf(m){ return (m && ICON_MAP[m.key]) || ""; }
 /* 画像が読み込めなかったときは、元のブキアイコンに戻す */
 function avFail(img){ const w = img.closest("[data-fb]"); if(w) w.outerHTML = w.getAttribute("data-fb"); }
@@ -959,7 +996,8 @@ function render(){
     const x = m.x ? `<a class="x" href="${X_URL}${m.x}" target="_blank" rel="noopener">@${esc(m.x)}</a>` : (m.xRaw ? esc(m.xRaw) : `<span class="none">—</span>`);
     const fc = m.fc ? `<span class="fc" data-copy="${esc(m.fc)}">${esc(m.fc)}</span><button class="copy" data-copy="${esc(m.fc)}" title="コピー">コピー</button>` : `<span class="none">—</span>`;
     const picked = st.picked.has(m.key);
-    return `<tr class="${picked?'picked':''}" data-key="${esc(m.key)}">
+    const th = memberTheme(m);
+    return `<tr class="${picked?'picked':''}${th?' hasc':''}" data-key="${esc(m.key)}"${th?` style="--mc:${th.acc}"`:""}>
       <td class="ck"><input type="checkbox" class="pick" ${picked?"checked":""}></td>
       <td class="rank r${m.rank}">${m.rank}</td>
       <td class="name"><button class="fav${isFav(m)?' on':''}" data-fav="${esc(m.key)}" title="${isFav(m)?'お気に入りから外す':'お気に入りに追加（一覧の上に表示）'}">${isFav(m)?'★':'☆'}</button>${iconOf(m)?`<img class="avs" src="${esc(iconOf(m))}" alt="" loading="lazy" onerror="this.remove()">`:""}<span class="nm" title="プロフィールを見る">${esc(m.name)}</span>${onlineNow(m)?'<span class="onl" title="今は主な浮上時間帯です"></span>':''}${isNew?'<span class="newb">NEW</span>':''}<div class="date">${date}</div></td>
@@ -1260,8 +1298,11 @@ function openProfile(m, keepScroll){
   const date = m.ts ? new Date(m.ts).toLocaleDateString("ja-JP",{year:"numeric",month:"numeric",day:"numeric"}) : "";
   const xIcon = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.8 3h3.1l-6.8 7.7L22 21h-6.2l-4.9-6.3L5.3 21H2.2l7.2-8.3L1.8 3h6.4l4.4 5.8zm-1.1 16.2h1.7L7.2 4.7H5.4z"/></svg>';
   const cats = new Set(m.allCats);
+  const th = memberTheme(m);
+  $("pf").classList.toggle("hasc", !!th);
+  if(th) $("pf").style.setProperty("--mc", th.acc); else $("pf").style.removeProperty("--mc");
   $("pf").innerHTML = `
-  <div class="pf-hero" style="--cc:${catVar(m.mainCat)}">
+  <div class="pf-hero${th && th.light ? ' lt' : ''}" style="--cc:${th ? th.base : catVar(m.mainCat)}">
     <div class="pf-top">
       <div class="nav"><button data-nav="prev" ${prev?"":"disabled"} title="1つ上の順位">‹ ${prev?esc(prev.name):""}</button><button data-nav="next" ${next?"":"disabled"} title="1つ下の順位">${next?esc(next.name):""} ›</button></div>
       <button data-close aria-label="閉じる">✕ 閉じる</button>
@@ -1294,7 +1335,7 @@ function openProfile(m, keepScroll){
       <h3>主な浮上時間帯</h3>
       ${schedSection(m)}
     </div>
-    <div class="pf-sec" style="--cc:${catVar(m.mainCat)}">
+    <div class="pf-sec" style="--cc:${th ? th.acc : catVar(m.mainCat)}">
       <h3>XPの推移</h3>
       ${xpSection(m)}
     </div>
@@ -1870,7 +1911,7 @@ function cmpSched(a, b){
 function compareBody(){
   const a = members.find(m=>m.key===cmpPair[0]), b = members.find(m=>m.key===cmpPair[1]);
   if(!a || !b) return `<div class="pf-sec"><div class="tl-empty">比較するメンバーが見つかりません</div></div>`;
-  const head = (m, cls) => `<div class="cmp-c ${cls}" data-key="${esc(m.key)}" style="--cc:${catVar(m.mainCat)}">${avatar(m, "md")}<div><b>${esc(m.name)}</b><small>${m.mainCat ? m.mainCat + "使い" : ""}</small></div></div>`;
+  const head = (m, cls) => `<div class="cmp-c ${cls}" data-key="${esc(m.key)}" style="--cc:${memberTheme(m) ? memberTheme(m).base : catVar(m.mainCat)}">${avatar(m, "md")}<div><b>${esc(m.name)}</b><small>${m.mainCat ? m.mainCat + "使い" : ""}</small></div></div>`;
   const row = (k, va, vb, c) => `<div class="ck2">${k}</div><div class="cv${c>0?' win':''}">${va}</div><div class="cv${c<0?' win':''}">${vb}</div>`;
   const wins = m => winsOf(m);
   const date = t => t ? fmtD(t, true) : "–";
@@ -1924,7 +1965,11 @@ const cardState = { key: "", img: "", comment: "", url: "", file: null };
 function cardLoad(k){ try{ const s = JSON.parse(localStorage.getItem("nsCard_" + k) || "null") || {}; return { img: s.img || "", comment: s.comment || "" }; }catch(_e){ return { img: "", comment: "" }; } }
 function cardSave(){ try{ localStorage.setItem("nsCard_" + cardState.key, JSON.stringify({ img: cardState.img, comment: cardState.comment })); }catch(_e){ toast("画像が大きすぎて、この端末に保存できませんでした（今回の作成には使えます）"); } }
 function drawCard(m){
-  const color = cssVar("--c-" + (CAT_KEY[m.mainCat] || "none")) || "#5b3cf5";
+  /* 基調色：シート「アイコン」のC列に色があればその色、なければメインブキのブキ種の色 */
+  const base = colorOf(m) || normColor(cssVar("--c-" + (CAT_KEY[m.mainCat] || "none"))) || "#5b3cf5";
+  const light = lum(base) > .5;                       /* 明るい色のときは帯の文字を黒にする */
+  const color = lum(base) > .6 ? shade(base, .35) : base;   /* グラフ・表の色は、白い枠の上で見えるよう明るすぎる色だけ少し暗く */
+  const HEAD_TXT = light ? "#1b1d22" : "#fff";
   const W = 1200, H = 630;
   const cv = document.createElement("canvas"); cv.width = W; cv.height = H;
   const ctx = cv.getContext("2d");
@@ -1945,7 +1990,7 @@ function drawCard(m){
 
     /* ---- 上の帯：アイコン・名前・タグ・最高XP ---- */
     const g = ctx.createLinearGradient(36, 0, 1164, 0); g.addColorStop(0, color); g.addColorStop(1, "rgba(255,255,255,.0)");
-    ctx.fillStyle = color; rr(ctx, 36, 28, 1128, 150, 26); ctx.fill();
+    ctx.fillStyle = base; rr(ctx, 36, 28, 1128, 150, 26); ctx.fill();
     ctx.save(); rr(ctx, 36, 28, 1128, 150, 26); ctx.clip();
     const g2 = ctx.createLinearGradient(36, 0, 1164, 0); g2.addColorStop(0, "rgba(255,255,255,0)"); g2.addColorStop(1, "rgba(255,255,255,.28)");
     ctx.fillStyle = g2; ctx.fillRect(36, 28, 1128, 150);
@@ -1957,12 +2002,12 @@ function drawCard(m){
       ctx.save(); rr(ctx, 61, 50, 106, 106, 24); ctx.clip();
       ctx.drawImage(photo, (photo.width - s)/2, (photo.height - s)/2, s, s, 61, 50, 106, 106); ctx.restore();
     } else if(mainIcon) ctx.drawImage(mainIcon, 72, 61, 84, 84);
-    ctx.fillStyle = "#fff";
+    ctx.fillStyle = HEAD_TXT;
     fitText(ctx, m.name, 680, 60, 900); ctx.fillText(m.name, 196, 108);
     const tags = [m.mainCat ? m.mainCat + "使い" : "", winsOf(m) ? "サーバー内大会優勝 " + winsOf(m) + "回" : "", m.x ? "X @" + m.x : ""].filter(Boolean).join("　・　");
     if(tags){ fitText(ctx, tags, 700, 24, 700); ctx.globalAlpha = .92; ctx.fillText(tags, 198, 148); ctx.globalAlpha = 1; }
-    ctx.fillStyle = "rgba(255,255,255,.2)"; rr(ctx, 948, 50, 196, 106, 20); ctx.fill();
-    ctx.fillStyle = "#fff"; ctx.textAlign = "center";
+    ctx.fillStyle = light ? "rgba(255,255,255,.45)" : "rgba(255,255,255,.2)"; rr(ctx, 948, 50, 196, 106, 20); ctx.fill();
+    ctx.fillStyle = HEAD_TXT; ctx.textAlign = "center";
     font(700, 20); ctx.globalAlpha = .9; ctx.fillText("最高XP", 1046, 84); ctx.globalAlpha = 1;
     fitText(ctx, String(m.power || "–"), 170, 50, 900); ctx.fillText(String(m.power || "–"), 1046, 138);
     ctx.textAlign = "left";
@@ -2048,7 +2093,7 @@ function drawCard(m){
       if(sh) sh.hidden = !(cardState.file && navigator.canShare && navigator.canShare({files: [cardState.file]}));
     }, "image/png");
   };
-  const run = () => Promise.all([svgImg(ICONS[CAT_KEY[m.mainCat] || "none"], color), loadImg(cardState.img || iconOf(m))]
+  const run = () => Promise.all([svgImg(ICONS[CAT_KEY[m.mainCat] || "none"], cssVar("--c-" + (CAT_KEY[m.mainCat] || "none")) || color), loadImg(cardState.img || iconOf(m))]
       .concat(weapons.map(wp=>wp[1] ? svgImg(ICONS[CAT_KEY[catOf(wp[1])] || "none"], catColor(wp[1])) : Promise.resolve(null)))).then(go);
   if(document.fonts && document.fonts.ready) document.fonts.ready.then(run); else run();
 }
