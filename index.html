@@ -882,7 +882,7 @@ function setResults(list){
 function awardsOf(m){ return RESULTS[m.key] || []; }
 function winsOf(m){ return awardsOf(m).filter(a=>a.type==="win").length; }
 const TROPHY_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M7 3h10v2h3v3a4 4 0 0 1-4 4h-.3A5 5 0 0 1 13 14.9V17h3v2H8v-2h3v-2.1A5 5 0 0 1 8.3 12H8a4 4 0 0 1-4-4V5h3zm0 4H6v1a2 2 0 0 0 1.2 1.8A5 5 0 0 1 7 9zm10 0v2c0 .3 0 .5-.1.8A2 2 0 0 0 18 8V7z"/><rect x="7" y="20" width="10" height="2" rx="1" fill="currentColor"/></svg>';
-function trophyBadge(m){ const n = winsOf(m); return n ? `<span class="tro" title="大会優勝 ${n}回">${TROPHY_SVG}${n > 1 ? n : ""}</span>` : ""; }
+function trophyBadge(m){ const n = winsOf(m); return n ? `<span class="tro" title="サーバー内大会優勝 ${n}回">${TROPHY_SVG}${n > 1 ? n : ""}</span>` : ""; }
 
 /* スマホ版の一覧（コンパクト表示）：順位・メインブキ・名前・XP・サブブキ1/2 を1人1行で */
 function mobileCard(m, isNew){
@@ -1849,7 +1849,7 @@ function compareBody(){
     ${row("サブ 1", esc(a.sub1) || "–", esc(b.sub1) || "–", 0)}
     ${row("サブ 2", esc(a.sub2) || "–", esc(b.sub2) || "–", 0)}
     ${row("扱えるブキ種", a.allCats.join("・") || "–", b.allCats.join("・") || "–", 0)}
-    ${row("大会優勝", wins(a) + "回", wins(b) + "回", wins(a) - wins(b))}
+    ${row("サーバー内大会優勝", wins(a) + "回", wins(b) + "回", wins(a) - wins(b))}
     ${row("登録日", date(a.ts), date(b.ts), 0)}
     ${row("最終更新", date(a.updTs), date(b.updTs), 0)}</div>`;
   return `<div class="cmp-h">${head(a, "cmpA")}${head(b, "cmpB")}</div>
@@ -1880,7 +1880,7 @@ function fitText(ctx, text, maxW, size, weight){
 function wrapLines(ctx, text, maxW, maxLines){
   const out = []; let line = "";
   for(const ch of text){
-    if(ctx.measureText(line + ch).width > maxW){ out.push(line); line = ch; if(out.length === maxLines) break; }
+    if(ctx.measureText(line + ch).width > maxW && "、。，．,.！？!?」』）)ーー…・".indexOf(ch) < 0){ out.push(line); line = ch; if(out.length === maxLines) break; }   /* 句読点は行頭に来ないよう前の行に付ける */
     else line += ch;
   }
   if(out.length < maxLines && line) out.push(line);
@@ -1893,48 +1893,117 @@ function cardLoad(k){ try{ const s = JSON.parse(localStorage.getItem("nsCard_" +
 function cardSave(){ try{ localStorage.setItem("nsCard_" + cardState.key, JSON.stringify({ img: cardState.img, comment: cardState.comment })); }catch(_e){ toast("画像が大きすぎて、この端末に保存できませんでした（今回の作成には使えます）"); } }
 function drawCard(m){
   const color = cssVar("--c-" + (CAT_KEY[m.mainCat] || "none")) || "#5b3cf5";
-  const cv = document.createElement("canvas"); cv.width = 1200; cv.height = 630;
+  const W = 1200, H = 630;
+  const cv = document.createElement("canvas"); cv.width = W; cv.height = H;
   const ctx = cv.getContext("2d");
+  const weapons = [["メイン", m.main], ["サブ 1", m.sub1], ["サブ 2", m.sub2]];
+  const catColor = w => cssVar("--c-" + (CAT_KEY[catOf(w)] || "none")) || "#9aa1ad";
+  const font = (w, s) => { ctx.font = `${w} ${s}px ${CARD_FF}`; };
+  const MUTED = "#6b7280", INK = "#1b1d22", OFF = "#eef0f5";
+  /* 白い枠（見出し付き） */
+  const box = (x, y, w, h, title) => {
+    ctx.save(); ctx.shadowColor = "rgba(20,30,60,.10)"; ctx.shadowBlur = 16; ctx.shadowOffsetY = 4;
+    ctx.fillStyle = "#fff"; rr(ctx, x, y, w, h, 22); ctx.fill(); ctx.restore();
+    font(700, 20); ctx.fillStyle = MUTED; ctx.textAlign = "left"; ctx.fillText(title, x + 22, y + 36);
+  };
   const go = function(arr){
-    const icon = arr[0], photo = arr[1];
-    ctx.fillStyle = color; ctx.fillRect(0, 0, 1200, 630);
-    const g = ctx.createLinearGradient(0, 0, 1200, 630); g.addColorStop(0, "rgba(0,0,0,0)"); g.addColorStop(1, "rgba(0,0,0,.5)");
-    ctx.fillStyle = g; ctx.fillRect(0, 0, 1200, 630);
-    ctx.fillStyle = "rgba(255,255,255,.08)"; ctx.beginPath(); ctx.arc(1110, 60, 260, 0, Math.PI*2); ctx.fill();
-    ctx.fillStyle = "rgba(255,255,255,.06)"; ctx.beginPath(); ctx.arc(960, 640, 200, 0, Math.PI*2); ctx.fill();
-    /* アイコン：アップロードした画像があれば正方形に切り抜いて表示、なければブキ種アイコン */
-    ctx.fillStyle = "#fff"; rr(ctx, 64, 64, 220, 220, 48); ctx.fill();
+    const mainIcon = arr[0], photo = arr[1], wIcons = arr.slice(2);
+    ctx.textBaseline = "alphabetic"; ctx.textAlign = "left";
+    ctx.fillStyle = "#f4f6fb"; ctx.fillRect(0, 0, W, H);
+
+    /* ---- 上の帯：アイコン・名前・タグ・最高XP ---- */
+    const g = ctx.createLinearGradient(36, 0, 1164, 0); g.addColorStop(0, color); g.addColorStop(1, "rgba(255,255,255,.0)");
+    ctx.fillStyle = color; rr(ctx, 36, 28, 1128, 150, 26); ctx.fill();
+    ctx.save(); rr(ctx, 36, 28, 1128, 150, 26); ctx.clip();
+    const g2 = ctx.createLinearGradient(36, 0, 1164, 0); g2.addColorStop(0, "rgba(255,255,255,0)"); g2.addColorStop(1, "rgba(255,255,255,.28)");
+    ctx.fillStyle = g2; ctx.fillRect(36, 28, 1128, 150);
+    ctx.fillStyle = "rgba(255,255,255,.10)"; ctx.beginPath(); ctx.arc(1120, 10, 150, 0, Math.PI*2); ctx.fill();
+    ctx.restore();
+    ctx.fillStyle = "#fff"; rr(ctx, 56, 45, 116, 116, 28); ctx.fill();
     if(photo){
       const s = Math.min(photo.width, photo.height);
-      ctx.save(); rr(ctx, 70, 70, 208, 208, 42); ctx.clip();
-      ctx.drawImage(photo, (photo.width - s)/2, (photo.height - s)/2, s, s, 70, 70, 208, 208);
-      ctx.restore();
-    } else if(icon) ctx.drawImage(icon, 89, 89, 170, 170);
-    ctx.fillStyle = "#fff"; ctx.textBaseline = "alphabetic";
-    fitText(ctx, m.name, 820, 76, 800); ctx.fillText(m.name, 320, 140);
-    const tags = [m.mainCat ? m.mainCat + "使い" : "", winsOf(m) ? "大会優勝 " + winsOf(m) + "回" : "", m.x ? "X @" + m.x : ""].filter(Boolean).join("　・　");
-    fitText(ctx, tags, 820, 28, 600); ctx.globalAlpha = .9; ctx.fillText(tags, 322, 190); ctx.globalAlpha = 1;
-    /* 一言 */
-    const cm = cardState.comment.trim();
-    if(cm){
-      ctx.font = `700 30px ${CARD_FF}`;
-      const lines = wrapLines(ctx, cm, 790, 2);
-      ctx.fillStyle = "rgba(255,255,255,.16)"; rr(ctx, 318, 214, 818, lines.length > 1 ? 92 : 56, 16); ctx.fill();
-      ctx.fillStyle = "#fff"; lines.forEach((l, i)=>ctx.fillText(l, 336, 252 + i*38));
-    }
-    const pct = percentile(m);
-    const kp = [["最高パワー", String(m.power || "–")], ["パワー順位", m.rank + " / " + members.length], ["上位", pct != null ? pct + "%" : "–"]];
-    kp.forEach((k, i)=>{
-      const x = 64 + i*262, y = 330;
-      ctx.fillStyle = "rgba(255,255,255,.16)"; rr(ctx, x, y, 246, 112, 22); ctx.fill();
-      ctx.fillStyle = "#fff"; fitText(ctx, k[0], 210, 22, 600); ctx.globalAlpha = .85; ctx.fillText(k[0], x+22, y+38); ctx.globalAlpha = 1;
-      fitText(ctx, k[1], 210, 44, 800); ctx.fillText(k[1], x+22, y+92);
+      ctx.save(); rr(ctx, 61, 50, 106, 106, 24); ctx.clip();
+      ctx.drawImage(photo, (photo.width - s)/2, (photo.height - s)/2, s, s, 61, 50, 106, 106); ctx.restore();
+    } else if(mainIcon) ctx.drawImage(mainIcon, 72, 61, 84, 84);
+    ctx.fillStyle = "#fff";
+    fitText(ctx, m.name, 680, 60, 900); ctx.fillText(m.name, 196, 108);
+    const tags = [m.mainCat ? m.mainCat + "使い" : "", winsOf(m) ? "サーバー内大会優勝 " + winsOf(m) + "回" : "", m.x ? "X @" + m.x : ""].filter(Boolean).join("　・　");
+    if(tags){ fitText(ctx, tags, 700, 24, 700); ctx.globalAlpha = .92; ctx.fillText(tags, 198, 148); ctx.globalAlpha = 1; }
+    ctx.fillStyle = "rgba(255,255,255,.2)"; rr(ctx, 948, 50, 196, 106, 20); ctx.fill();
+    ctx.fillStyle = "#fff"; ctx.textAlign = "center";
+    font(700, 20); ctx.globalAlpha = .9; ctx.fillText("最高XP", 1046, 84); ctx.globalAlpha = 1;
+    fitText(ctx, String(m.power || "–"), 170, 50, 900); ctx.fillText(String(m.power || "–"), 1046, 138);
+    ctx.textAlign = "left";
+
+    /* ---- 左：よく浮上する時間（曜日×時間帯） ---- */
+    const bx = 36, by = 198, bw = 548, bh = 400;
+    box(bx, by, bw, bh, "よく浮上する時間");
+    if(m.sched){
+      const gx = bx + 62, gy = by + 58, gw = bw - 62 - 24, gh = bh - 58 - 50;
+      const rowH = gh / 7, gap = 5, total = SLOT_W.reduce((a,b)=>a+b, 0);
+      const order = [1,2,3,4,5,6,0];
+      order.forEach((d, r)=>{
+        const y = gy + r * rowH;
+        font(800, 19); ctx.fillStyle = d===0 ? "#dc2626" : d===6 ? "#2563eb" : INK; ctx.textAlign = "center";
+        ctx.fillText(DAYS[d], bx + 40, y + rowH/2 + 7); ctx.textAlign = "left";
+        let x = gx;
+        SLOTS.forEach((sl, i)=>{
+          const cw = gw * SLOT_W[i] / total;
+          ctx.fillStyle = m.sched[d].indexOf(i) >= 0 ? color : OFF;
+          rr(ctx, x + gap/2, y + gap/2, cw - gap, rowH - gap, 5); ctx.fill();
+          x += cw;
+        });
+      });
+      font(600, 15); ctx.fillStyle = "#9aa1ad"; ctx.textAlign = "center";
+      [0,3,6,17,19,21,24].forEach(h=>{ ctx.fillText(String(h), gx + gw * tpos(h) / 100, gy + gh + 24); });
+      ctx.textAlign = "left";
+    } else { font(600, 22); ctx.fillStyle = "#9aa1ad"; ctx.fillText("まだ回答がありません", bx + 22, by + 90); }
+
+    /* ---- 右上：XPの推移 ---- */
+    const xx = 604, xy = 198, xw = 560, xh = 200;
+    box(xx, xy, xw, xh, "XPの推移");
+    const h = xpRecords(m);
+    if(h.length){
+      const now = Date.now(), t0 = Math.min(h[0].ts, now - 7*DAY), t1 = now;
+      let lo = Math.min.apply(null, h.map(p=>p.power)), hi = Math.max.apply(null, h.map(p=>p.power));
+      const span = Math.max(80, hi - lo); lo -= span * .25; hi += span * .25;
+      const px = xx + 70, pw = xw - 70 - 90, py = xy + 54, ph = xh - 54 - 34;
+      const X = t => px + (t - t0) / (t1 - t0) * pw, Y = v => py + (hi - v) / (hi - lo) * ph;
+      font(600, 14); ctx.fillStyle = "#9aa1ad"; ctx.textAlign = "right";
+      ctx.fillText(String(Math.round(hi)), px - 10, py + 5); ctx.fillText(String(Math.round(lo)), px - 10, py + ph + 5);
+      ctx.strokeStyle = OFF; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(px, py); ctx.lineTo(px + pw, py); ctx.moveTo(px, py + ph); ctx.lineTo(px + pw, py + ph); ctx.stroke();
+      ctx.textAlign = "center"; ctx.fillText(fmtD(t0), px, py + ph + 24); ctx.fillText("今日", px + pw, py + ph + 24); ctx.textAlign = "left";
+      const pts = h.map(p=>[X(p.ts), Y(p.power)]), last = pts[pts.length-1];
+      ctx.beginPath(); pts.forEach((p, i)=> i ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1])); ctx.lineTo(X(now), last[1]);
+      ctx.lineTo(X(now), py + ph); ctx.lineTo(pts[0][0], py + ph); ctx.closePath();
+      ctx.globalAlpha = .14; ctx.fillStyle = color; ctx.fill(); ctx.globalAlpha = 1;
+      ctx.strokeStyle = color; ctx.lineWidth = 4; ctx.lineJoin = "round";
+      ctx.beginPath(); pts.forEach((p, i)=> i ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1])); ctx.stroke();
+      ctx.setLineDash([8, 6]); ctx.beginPath(); ctx.moveTo(last[0], last[1]); ctx.lineTo(X(now), last[1]); ctx.stroke(); ctx.setLineDash([]);
+      pts.forEach(p=>{ ctx.fillStyle = color; ctx.strokeStyle = "#fff"; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(p[0], p[1], 6, 0, Math.PI*2); ctx.fill(); ctx.stroke(); });
+      font(900, 24); ctx.fillStyle = color; ctx.fillText(String(h[h.length-1].power), X(now) + 10, last[1] + 8);
+    } else { font(600, 22); ctx.fillStyle = "#9aa1ad"; ctx.fillText("記録がありません", xx + 22, xy + 90); }
+
+    /* ---- 右下左：持ちブキ ---- */
+    const wx = 604, wy = 414, ww = 272, wh = 184;
+    box(wx, wy, ww, wh, "持ちブキ");
+    weapons.forEach((wp, i)=>{
+      const y = wy + 52 + i * 42;
+      if(wIcons[i]){ ctx.fillStyle = "#f4f6fb"; rr(ctx, wx + 20, y, 34, 34, 9); ctx.fill(); ctx.drawImage(wIcons[i], wx + 23, y + 3, 28, 28); }
+      font(700, 13); ctx.fillStyle = MUTED; ctx.fillText(wp[0], wx + 64, y + 13);
+      ctx.fillStyle = wp[1] ? INK : "#b0b6bf"; fitText(ctx, wp[1] || "未登録", ww - 64 - 18, 19, 800); ctx.fillText(wp[1] || "未登録", wx + 64, y + 33);
     });
-    const wl = "メイン  " + (m.main || "–") + ([m.sub1, m.sub2].filter(Boolean).length ? "　／　サブ  " + [m.sub1, m.sub2].filter(Boolean).join("・") : "");
-    fitText(ctx, wl, 1070, 30, 700); ctx.fillText(wl, 66, 506);
-    if(m.sched){ const s = schedSummary(m).replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim(); if(s){ const t = "よく浮上する時間  " + s; fitText(ctx, t, 1070, 26, 600); ctx.globalAlpha = .9; ctx.fillText(t, 66, 552); ctx.globalAlpha = 1; } }
-    const foot = "メンバー名簿 ・ " + fmtD(Date.now(), true);
-    fitText(ctx, foot, 600, 20, 600); ctx.globalAlpha = .75; ctx.textAlign = "right"; ctx.fillText(foot, 1136, 602); ctx.textAlign = "left"; ctx.globalAlpha = 1;
+
+    /* ---- 右下右：一言 ---- */
+    const cx = 892, cy = 414, cw = 272, ch = 184;
+    box(cx, cy, cw, ch, "一言");
+    const cm = cardState.comment.trim();
+    if(cm){ font(700, 21); ctx.fillStyle = INK; wrapLines(ctx, cm, cw - 44, 4).forEach((l, i)=>ctx.fillText(l, cx + 22, cy + 72 + i * 30)); }
+    else { font(600, 18); ctx.fillStyle = "#b0b6bf"; ctx.fillText("（未入力）", cx + 22, cy + 72); }
+
+    /* ---- 右下の小さい表記 ---- */
+    font(600, 14); ctx.fillStyle = "#9aa1ad"; ctx.textAlign = "right"; ctx.fillText("メンバー名簿 ・ " + fmtD(Date.now(), true), 1164, 620); ctx.textAlign = "left";
+
     cv.toBlob(function(blob){
       if(!blob){ toast("画像を作れませんでした"); return; }
       if(cardState.url) URL.revokeObjectURL(cardState.url);
@@ -1947,7 +2016,8 @@ function drawCard(m){
       if(sh) sh.hidden = !(cardState.file && navigator.canShare && navigator.canShare({files: [cardState.file]}));
     }, "image/png");
   };
-  const run = () => Promise.all([svgImg(ICONS[CAT_KEY[m.mainCat] || "none"], color), loadImg(cardState.img)]).then(go);
+  const run = () => Promise.all([svgImg(ICONS[CAT_KEY[m.mainCat] || "none"], color), loadImg(cardState.img)]
+      .concat(weapons.map(wp=>wp[1] ? svgImg(ICONS[CAT_KEY[catOf(wp[1])] || "none"], catColor(wp[1])) : Promise.resolve(null)))).then(go);
   if(document.fonts && document.fonts.ready) document.fonts.ready.then(run); else run();
 }
 function makeCard(m){
@@ -1959,8 +2029,8 @@ function makeCard(m){
       <div class="cf-row"><span>アイコン画像</span>
         <span class="cf-ctl"><label class="tbtn"><input type="file" accept="image/*" data-tlc="cimg" hidden>画像を選ぶ</label><button class="tbtn" data-tl="cimgdel"${cardState.img ? "" : " hidden"} id="cardImgDel">画像を外す</button></span></div>
       <div class="cf-note">正方形（1:1）で表示されます。縦長・横長の画像は中央が切り抜かれます。</div>
-      <label class="cf-row"><span>一言</span><input type="text" id="cardComment" data-tli="ccomment" maxlength="50" placeholder="例：エリア好きです！気軽に誘ってください" value="${esc(cardState.comment)}"></label>
-      <div class="cf-note">50文字まで（長いときは2行に折り返します）。画像と一言はこの端末に保存されます。</div>
+      <label class="cf-row"><span>一言</span><input type="text" id="cardComment" data-tli="ccomment" maxlength="60" placeholder="例：エリア好きです！気軽に誘ってください" value="${esc(cardState.comment)}"></label>
+      <div class="cf-note">60文字まで（長いときは折り返します）。画像と一言はこの端末に保存されます。</div>
     </div>
     <div class="tbtns"><a class="tbtn tform" id="cardDl" href="#" download="${esc(m.name)}_プロフィール.png">画像を保存</a><button class="tbtn" data-tl="cshare" id="cardShare" hidden>共有する</button></div>
     <div class="tsum">スマホでは画像を長押しして保存することもできます。</div>`);
