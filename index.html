@@ -323,6 +323,9 @@ html.force-m .pf-fab{right:calc(50% - 208px)}
 .mc .newb{font-size:.6rem}
 .mck{flex:0 0 28px;width:28px;height:28px;margin:-4px -2px -4px -4px;border-radius:50%;border:2px solid color-mix(in srgb,var(--muted) 55%,transparent);background:var(--surface);color:transparent;padding:0;font-size:.85rem;font-weight:900;line-height:1;display:grid;place-items:center;cursor:pointer}
 .mt{overflow:hidden}.mt .ms{min-width:0}.msub{max-width:100%;overflow:hidden;text-overflow:ellipsis;display:inline-block}.msub .wi.xs{vertical-align:-3px;width:1.4em;height:1.4em}
+.chip.chip-fav{border-color:color-mix(in srgb,var(--gold) 55%,var(--line));color:var(--gold);font-weight:700}
+.chip.chip-fav.on{background:var(--gold);border-color:var(--gold);color:#fff}
+.chip.chip-fav.on .n{opacity:.85}
 .mfavb{flex:0 0 32px;width:32px;height:36px;margin:-6px -8px -6px -4px;padding:0;font-size:1.25rem;display:grid;place-items:center}
 .mck.on{background:var(--accent);border-color:var(--accent);color:#fff}
 .shown-m{align-items:center;justify-content:space-between;gap:8px}
@@ -864,7 +867,9 @@ const slotAny = () => document.querySelector('input[name=slot]:checked').value =
 function catsOf(m){ return slotAny() ? m.allCats : (m.mainCat ? [m.mainCat] : []); }
 function renderChips(){
   const counts = Object.fromEntries(CATS.map(c=>[c, members.filter(m=>catsOf(m).includes(c)).length]));
-  $("chips").innerHTML = `<button class="chip${st.cats.size?'':' on'}" data-cat="">すべて<span class="n">${members.length}</span></button>` +
+  const favN = typeof isFav === "function" ? members.filter(isFav).length : 0, favOn = $("favOnly").checked;
+  $("chips").innerHTML = (favN || favOn ? `<button class="chip chip-fav${favOn?' on':''}" data-favf="1" title="お気に入りにした人だけ表示">★ お気に入り<span class="n">${favN}</span></button>` : "") +
+    `<button class="chip${st.cats.size?'':' on'}" data-cat="">すべて<span class="n">${members.length}</span></button>` +
     CATS.filter(c=>counts[c]).map(c=>`<button class="chip${st.cats.has(c)?' on':''}" data-cat="${c}">${c}<span class="n">${counts[c]}</span></button>`).join("");
   const pmin = $("pmin").value, pmax = $("pmax").value;
   $("presets").innerHTML = PRESETS.map(([l,a,b])=>`<button class="chip${String(a==null?"":a)===pmin && String(b==null?"":b)===pmax?' on':''}" data-a="${a==null?"":a}" data-b="${b==null?"":b}">${l}</button>`).join("");
@@ -1000,7 +1005,6 @@ function median(a){ if(!a.length) return NaN; const s=[...a].sort((x,y)=>x-y), h
 let shown = [];
 function render(){
   shown = sorted(filtered());
-  if(typeof isFav === "function"){ const fv = shown.filter(isFav); if(fv.length) shown = fv.concat(shown.filter(m=>!isFav(m))); }
   const pw = members.map(m=>m.power).filter(Boolean), spw = shown.map(m=>m.power).filter(Boolean);
   const max = Math.max(...pw), min = Math.min(...pw), now = Date.now();
   $("sCount").textContent = members.length + "人";
@@ -1029,7 +1033,7 @@ function render(){
     return `<tr class="${picked?'picked':''}${th?' hasc':''}" data-key="${esc(m.key)}"${th?` style="--mc:${th.acc}"`:""}>
       <td class="ck"><input type="checkbox" class="pick" ${picked?"checked":""}></td>
       <td class="rank r${m.rank}">${m.rank}</td>
-      <td class="name"><button class="fav${isFav(m)?' on':''}" data-fav="${esc(m.key)}" title="${isFav(m)?'お気に入りから外す':'お気に入りに追加（一覧の上に表示）'}">${isFav(m)?'★':'☆'}</button>${iconOf(m)?`<img class="avs" src="${esc(iconOf(m))}" alt="" loading="lazy" decoding="async" onerror="this.remove()">`:""}<span class="nm" title="プロフィールを見る">${esc(m.name)}</span>${onlineNow(m)?'<span class="onl" title="今は主な浮上時間帯です"></span>':''}${isNew?'<span class="newb">NEW</span>':''}<div class="date">${date}</div></td>
+      <td class="name"><button class="fav${isFav(m)?' on':''}" data-fav="${esc(m.key)}" title="${isFav(m)?'お気に入りから外す':'お気に入りに追加'}">${isFav(m)?'★':'☆'}</button>${iconOf(m)?`<img class="avs" src="${esc(iconOf(m))}" alt="" loading="lazy" decoding="async" onerror="this.remove()">`:""}<span class="nm" title="プロフィールを見る">${esc(m.name)}</span>${onlineNow(m)?'<span class="onl" title="今は主な浮上時間帯です"></span>':''}${isNew?'<span class="newb">NEW</span>':''}<div class="date">${date}</div></td>
       <td class="pw"><div class="power">${m.power || "–"}</div></td>
       <td class="w">${typeof wIcon==="function"?wIcon(m.main,m.mainCat,"sm"):""}<span class="main">${w(m.main)||"–"}</span>${m.mainCat?`<span class="cat" style="--cc:${catVar(m.mainCat)}" data-cat="${m.mainCat}">${m.mainCat}</span>`:""}${subs?`<div class="subs">${subs}</div>`:""}</td>
       <td class="o other">${esc(m.other)}</td>
@@ -1082,7 +1086,9 @@ $("rows").addEventListener("click", e=>{
 $("mPickAll").addEventListener("click", ()=>{ const all = shown.length>0 && shown.every(m=>st.picked.has(m.key)); shown.forEach(m=> all ? st.picked.delete(m.key) : st.picked.add(m.key)); render(); });
 $("pickAll").addEventListener("change", e=>{ shown.forEach(m=> e.target.checked ? st.picked.add(m.key) : st.picked.delete(m.key)); render(); });
 $("chips").addEventListener("click", e=>{
-  const b = e.target.closest(".chip"); if(!b) return; const c = b.dataset.cat;
+  const b = e.target.closest(".chip"); if(!b) return;
+  if(b.dataset.favf){ $("favOnly").checked = !$("favOnly").checked; renderChips(); render(); return; }
+  const c = b.dataset.cat;
   if(!c) st.cats.clear(); else st.cats.has(c) ? st.cats.delete(c) : st.cats.add(c);
   renderChips(); render();
 });
@@ -1103,6 +1109,7 @@ document.querySelectorAll("th.s").forEach(th=>th.addEventListener("click", ()=>{
 ["q","pmin","pmax"].forEach(id=>$(id).addEventListener("input", ()=>{ renderChips(); render(); }));
 ["sort","andCats","hasX","hasFC","newOnly","pickedOnly","nowOnline","favOnly","staleOnly"].forEach(id=>$(id).addEventListener("change", render));
 document.querySelectorAll("input[name=slot]").forEach(r=>r.addEventListener("change", ()=>{ renderChips(); render(); }));
+$("favOnly").addEventListener("change", renderChips);
 $("clear2").addEventListener("click", ()=>$("clear").click());
 $("clear").addEventListener("click", ()=>{
   $("q").value=""; $("pmin").value=""; $("pmax").value=""; st.cats.clear();
@@ -1381,7 +1388,7 @@ function openProfile(m, keepScroll){
     </div>
     <div class="pf-sec">
       <h3>パワーの位置</h3>
-      <div class="pinfo"><span>全体平均 <b>${fmt(avgP)}</b></span>${!isNaN(diff)?`<span>平均との差 <b class="${diff>=0?'up':'dn'}">${diff>=0?"+":""}${fmt(diff)}</b></span>`:""}<span>中央値 <b>${fmt(median(a.map(x=>x.power)))}</b></span></div>
+      <div class="pinfo"><span>全体平均 <b>${fmt(avgP)}</b></span><span>中央値 <b>${fmt(median(a.map(x=>x.power)))}</b></span></div>
       ${histogram(m)}
     </div>
     ${awardsSection(m)}
@@ -1636,8 +1643,8 @@ function isFav(m){ return FAVS.has(m.key); }
 function toggleFav(k){
   if(FAVS.has(k)) FAVS.delete(k); else FAVS.add(k);
   try{ localStorage.setItem(FAV_KEY, JSON.stringify(Array.from(FAVS))); }catch(_e){}
-  toast(FAVS.has(k) ? "お気に入りに追加しました（一覧の上に表示されます）" : "お気に入りから外しました");
-  render();
+  toast(FAVS.has(k) ? "お気に入りに追加しました（「★ お気に入り」で絞り込めます）" : "お気に入りから外しました");
+  renderChips(); render();
 }
 
 /* ---------- 情報が古い人 ---------- */
