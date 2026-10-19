@@ -343,6 +343,17 @@ html.force-m tbody tr[data-key]{display:block!important;padding:0!important;marg
 .aw-win{border-color:color-mix(in srgb,#f4c430 45%,var(--line));background:color-mix(in srgb,#f4c430 8%,var(--surface))}
 .aw-t{min-width:0}.aw-t b{font-size:.92rem}
 .aw-m{display:flex;flex-wrap:wrap;align-items:center;gap:5px;margin-top:5px}
+.avw{position:relative;display:inline-block;flex:0 0 auto}
+.avw .av{display:block;width:100%;height:100%;border-radius:50%;object-fit:cover;background:var(--chip)}
+.avw .avb .wi{position:absolute!important;right:-4px;bottom:-4px;margin:0!important;box-shadow:0 0 0 2px var(--surface);background:var(--surface)!important}
+.avw.av-md{width:38px;height:38px}.avw.av-md .avb .wi{width:18px!important;height:18px!important;border-radius:6px!important}
+.pf-id .avw.av-lg{width:96px;height:96px}.pf-id .avw.av-lg .av{border-radius:24px;border:3px solid rgba(255,255,255,.95);box-shadow:0 6px 18px rgba(0,0,0,.25)}
+.pf-id .avw.av-lg .avb .wi{width:38px!important;height:38px!important;border-radius:12px!important;right:-8px;bottom:-8px;background:#fff!important;box-shadow:0 2px 8px rgba(0,0,0,.25)}
+.cmp-c .avw.av-md{width:56px;height:56px}.cmp-c .avw .av{border:3px solid rgba(255,255,255,.95)}
+.avs{width:30px;height:30px;border-radius:50%;object-fit:cover;vertical-align:middle;margin-right:8px;background:var(--chip)}
+.person .avp{width:24px;height:24px;border-radius:50%;object-fit:cover;flex:0 0 auto}
+.person.mate .avp{width:20px;height:20px}
+@media (max-width:760px){html:not(.force-pc) .pf-id .avw.av-lg{width:76px;height:76px}}html.force-m .pf-id .avw.av-lg{width:76px;height:76px}
 .aw2{border:1px solid var(--line);border-radius:12px;overflow:hidden}
 .aw-r{border-bottom:1px solid var(--line);background:var(--surface)}
 .aw-r:last-child{border-bottom:none}
@@ -682,7 +693,7 @@ function showLocalCache(){
   try{
     const c = JSON.parse(localStorage.getItem(LOCAL_KEY) || "null");
     if(!c || !c.d || !c.d.data) return false;
-    setResults(c.d.results); setFormInfo(c.d.form);
+    setResults(c.d.results); setFormInfo(c.d.form); setIcons(c.d.icons);
     parse(toTable(c.d.data));
     if(c.d.images && typeof applyImages === "function") applyImages(c.d.images);
     setStatus("load", "前回（" + new Date(c.t).toLocaleString("ja-JP",{month:"numeric",day:"numeric",hour:"2-digit",minute:"2-digit"}) + "）のデータを表示中・最新を読み込み中…");
@@ -702,7 +713,7 @@ function load(){
       clearTimeout(loadTimer);
       let d; try{ d = JSON.parse(txt); }catch(_e){ throw new Error("データの形式が正しくありません（Apps Script のアクセス設定が「全員」になっているか確認してください）"); }
       if(d.error) throw new Error(d.error);
-      setResults(d.results); setFormInfo(d.form);
+      setResults(d.results); setFormInfo(d.form); setIcons(d.icons);
       parse(toTable(d.data));
       lastLoaded = Date.now();
       setStatus("ok", "最終更新 " + new Date().toLocaleTimeString("ja-JP"));
@@ -869,6 +880,27 @@ function sorted(list){
 }
 
 /* ---------- 描画 ---------- */
+/* ---------- 個人アイコン（GitHubの icons フォルダ／シート「アイコン」で名前とファイル名を対応づけ） ---------- */
+let ICON_MAP = {};
+function setIcons(list){
+  ICON_MAP = {};
+  (list || []).forEach(r=>{ const f = String(r[1] || "").trim(); if(!r[0] || !f) return;
+    ICON_MAP[norm(r[0])] = /^https:/.test(f) ? f : "icons/" + f.split("/").map(encodeURIComponent).join("/"); });
+}
+function iconOf(m){ return (m && ICON_MAP[m.key]) || ""; }
+/* 画像が読み込めなかったときは、元のブキアイコンに戻す */
+function avFail(img){ const w = img.closest("[data-fb]"); if(w) w.outerHTML = w.getAttribute("data-fb"); }
+/* アイコンがある人は丸いアイコン＋右下にメインブキのマーク、ない人は今まで通りブキアイコン */
+function avatar(m, size){
+  const fb = wIcon(m.main, m.mainCat, size), u = iconOf(m);
+  if(!u) return fb;
+  return `<span class="avw av-${size}" data-fb="${esc(fb)}"><img class="av" src="${esc(u)}" alt="" loading="lazy" onerror="avFail(this)"><span class="avb">${wIcon(m.main, m.mainCat, "xs")}</span></span>`;
+}
+function avatarSmall(m){
+  const u = iconOf(m), fb = wIcon(m.main, m.mainCat, "sm");
+  return u ? `<img class="avp" src="${esc(u)}" alt="" loading="lazy" data-fb="${esc(fb)}" onerror="this.outerHTML=this.getAttribute('data-fb')">` : fb;
+}
+
 /* ---------- 大会結果（スプレッドシート「大会結果（手入力）」） ---------- */
 let RESULTS = {};
 function resultType(title){ return /準優勝/.test(title) ? "second" : /優勝/.test(title) ? "win" : /出場/.test(title) ? "entry" : "other"; }
@@ -890,7 +922,7 @@ function mobileCard(m, isNew){
   const rk = m.rank <= 3 ? `<span class="mrk md${m.rank}">${m.rank}</span>` : `<span class="mrk">${m.rank}</span>`;
   const subs = [m.sub1, m.sub2].filter(Boolean).map((w,i)=>`<span class="msub">${wIcon(w, catOf(w), "xs")}${esc(w)}</span>`).join("");
   const pk = st.picked.has(m.key);
-  return `<div class="mc"><button class="mck${pk?' on':''}" data-mpick="${esc(m.key)}" aria-label="${pk?'選択を外す':'選択する'}">✓</button>${rk}${wIcon(m.main, m.mainCat, "md")}
+  return `<div class="mc"><button class="mck${pk?' on':''}" data-mpick="${esc(m.key)}" aria-label="${pk?'選択を外す':'選択する'}">✓</button>${rk}${avatar(m, "md")}
     <div class="mt"><b>${esc(m.name)}${onlineNow(m)?'<i class="mon" title="今は主な浮上時間帯です"></i>':''}${isNew?'<span class="newb">NEW</span>':''}</b>
       <small class="mw">${esc(m.main) || "メインブキ未登録"}</small>
       ${subs ? `<small class="ms">${subs}</small>` : ""}</div>
@@ -930,7 +962,7 @@ function render(){
     return `<tr class="${picked?'picked':''}" data-key="${esc(m.key)}">
       <td class="ck"><input type="checkbox" class="pick" ${picked?"checked":""}></td>
       <td class="rank r${m.rank}">${m.rank}</td>
-      <td class="name"><button class="fav${isFav(m)?' on':''}" data-fav="${esc(m.key)}" title="${isFav(m)?'お気に入りから外す':'お気に入りに追加（一覧の上に表示）'}">${isFav(m)?'★':'☆'}</button><span class="nm" title="プロフィールを見る">${esc(m.name)}</span>${onlineNow(m)?'<span class="onl" title="今は主な浮上時間帯です"></span>':''}${isNew?'<span class="newb">NEW</span>':''}<div class="date">${date}</div></td>
+      <td class="name"><button class="fav${isFav(m)?' on':''}" data-fav="${esc(m.key)}" title="${isFav(m)?'お気に入りから外す':'お気に入りに追加（一覧の上に表示）'}">${isFav(m)?'★':'☆'}</button>${iconOf(m)?`<img class="avs" src="${esc(iconOf(m))}" alt="" loading="lazy" onerror="this.remove()">`:""}<span class="nm" title="プロフィールを見る">${esc(m.name)}</span>${onlineNow(m)?'<span class="onl" title="今は主な浮上時間帯です"></span>':''}${isNew?'<span class="newb">NEW</span>':''}<div class="date">${date}</div></td>
       <td class="pw"><div class="power">${m.power || "–"}</div></td>
       <td class="w">${typeof wIcon==="function"?wIcon(m.main,m.mainCat,"sm"):""}<span class="main">${w(m.main)||"–"}</span>${m.mainCat?`<span class="cat" style="--cc:${catVar(m.mainCat)}" data-cat="${m.mainCat}">${m.mainCat}</span>`:""}${subs?`<div class="subs">${subs}</div>`:""}</td>
       <td class="o other">${esc(m.other)}</td>
@@ -1197,7 +1229,7 @@ function awardsSection(m){
   const order = {win:0, second:1, entry:2, other:3};
   const dkey = a => awTs(a) || Infinity;
   const sorted = list.slice().sort((a,b)=>(order[a.type]-order[b.type]) || (dkey(a)-dkey(b)) || a.idx-b.idx);
-  const mate = n => { const k = norm(n), mm = members.find(x=>x.key===k); return mm ? `<span class="person mate" data-key="${esc(mm.key)}">${wIcon(mm.main,mm.mainCat,"sm")}<b>${esc(mm.name)}</b></span>` : `<span class="mate-off">${esc(n)}</span>`; };
+  const mate = n => { const k = norm(n), mm = members.find(x=>x.key===k); return mm ? `<span class="person mate" data-key="${esc(mm.key)}">${avatarSmall(mm)}<b>${esc(mm.name)}</b></span>` : `<span class="mate-off">${esc(n)}</span>`; };
   const rows = sorted.map(a=>{
     const d = awDateText(a);
     const head = `<span class="aw-ic">${TROPHY_SVG}</span><span class="aw-d">${esc(d)}</span><span class="aw-tt"><b>${esc(a.title)}</b>${a.team?`<span class="aw-tg">${esc(a.team)}</span>`:""}</span><span class="aw-sub"><span>${esc(d)}</span>${a.team?`<span class="aw-tg">${esc(a.team)}</span>`:""}</span>`;
@@ -1209,7 +1241,7 @@ function awardsSection(m){
   }).join("");
   return `<div class="pf-sec"><h3>大会実績${winsOf(m)?`<span class="aw-sum">優勝 ${winsOf(m)}回</span>`:""}</h3><div class="aw2">${rows}</div></div>`;
 }
-function personChip(m){ return `<span class="person" data-key="${esc(m.key)}">${wIcon(m.main,m.mainCat,"sm")}<b>${esc(m.name)}</b><span>${m.power||"–"}</span></span>`; }
+function personChip(m){ return `<span class="person" data-key="${esc(m.key)}">${avatarSmall(m)}<b>${esc(m.name)}</b><span>${m.power||"–"}</span></span>`; }
 function wtile(slot, w, extra){
   if(!w) return `<div class="wtile empty"><div class="slot">${slot}</div><div class="wn">未登録</div></div>`;
   const c = catOf(w);
@@ -1235,7 +1267,7 @@ function openProfile(m, keepScroll){
       <button data-close aria-label="閉じる">✕ 閉じる</button>
     </div>
     <div class="pf-id">
-      ${wIcon(m.main,m.mainCat,"lg")}
+      ${avatar(m, "lg")}
       <div style="min-width:0">
         <div class="pf-name">${esc(m.name)}</div>
         <div class="pf-sub">${getMe()===m.key?'<span class="tag me-tag">自分</span>':""}${isFav(m)?'<span class="tag">★ お気に入り</span>':""}${m.mainCat?`<span class="tag">${m.mainCat}使い</span>`:""}${winsOf(m)?`<span class="tag tag-win">${TROPHY_SVG}優勝 ${winsOf(m)}回</span>`:""}${isNew?'<span class="tag">NEW</span>':""}${date?`<span>${date} 登録</span>`:""}${m.updTs && m.updTs!==m.ts ? `<span>・${new Date(m.updTs).toLocaleDateString("ja-JP",{year:"numeric",month:"numeric",day:"numeric"})} 更新</span>`:""}${isStale(m)?`<span class="tag tag-stale">最終更新から${staleDays(m)}日</span>`:""}</div>
@@ -1838,7 +1870,7 @@ function cmpSched(a, b){
 function compareBody(){
   const a = members.find(m=>m.key===cmpPair[0]), b = members.find(m=>m.key===cmpPair[1]);
   if(!a || !b) return `<div class="pf-sec"><div class="tl-empty">比較するメンバーが見つかりません</div></div>`;
-  const head = (m, cls) => `<div class="cmp-c ${cls}" data-key="${esc(m.key)}" style="--cc:${catVar(m.mainCat)}">${wIcon(m.main, m.mainCat, "md")}<div><b>${esc(m.name)}</b><small>${m.mainCat ? m.mainCat + "使い" : ""}</small></div></div>`;
+  const head = (m, cls) => `<div class="cmp-c ${cls}" data-key="${esc(m.key)}" style="--cc:${catVar(m.mainCat)}">${avatar(m, "md")}<div><b>${esc(m.name)}</b><small>${m.mainCat ? m.mainCat + "使い" : ""}</small></div></div>`;
   const row = (k, va, vb, c) => `<div class="ck2">${k}</div><div class="cv${c>0?' win':''}">${va}</div><div class="cv${c<0?' win':''}">${vb}</div>`;
   const wins = m => winsOf(m);
   const date = t => t ? fmtD(t, true) : "–";
@@ -2016,7 +2048,7 @@ function drawCard(m){
       if(sh) sh.hidden = !(cardState.file && navigator.canShare && navigator.canShare({files: [cardState.file]}));
     }, "image/png");
   };
-  const run = () => Promise.all([svgImg(ICONS[CAT_KEY[m.mainCat] || "none"], color), loadImg(cardState.img)]
+  const run = () => Promise.all([svgImg(ICONS[CAT_KEY[m.mainCat] || "none"], color), loadImg(cardState.img || iconOf(m))]
       .concat(weapons.map(wp=>wp[1] ? svgImg(ICONS[CAT_KEY[catOf(wp[1])] || "none"], catColor(wp[1])) : Promise.resolve(null)))).then(go);
   if(document.fonts && document.fonts.ready) document.fonts.ready.then(run); else run();
 }
