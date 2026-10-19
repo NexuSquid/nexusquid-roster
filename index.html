@@ -320,6 +320,8 @@ html.force-m .pf-fab{right:calc(50% - 208px)}
 .mp{font-weight:800;font-size:1.02rem;font-variant-numeric:tabular-nums;flex:0 0 auto}
 .mc .newb{font-size:.6rem}
 .mck{flex:0 0 28px;width:28px;height:28px;margin:-4px -2px -4px -4px;border-radius:50%;border:2px solid color-mix(in srgb,var(--muted) 55%,transparent);background:var(--surface);color:transparent;padding:0;font-size:.85rem;font-weight:900;line-height:1;display:grid;place-items:center;cursor:pointer}
+.mt{overflow:hidden}.mt .ms{min-width:0}.msub{max-width:100%;overflow:hidden;text-overflow:ellipsis;display:inline-block}.msub .wi.xs{vertical-align:-3px;width:1.4em;height:1.4em}
+.mfavb{flex:0 0 32px;width:32px;height:36px;margin:-6px -8px -6px -4px;padding:0;font-size:1.25rem;display:grid;place-items:center}
 .mck.on{background:var(--accent);border-color:var(--accent);color:#fff}
 .shown-m{align-items:center;justify-content:space-between;gap:8px}
 .mpk button{font-size:.75rem;padding:3px 10px;border-radius:999px}
@@ -341,6 +343,7 @@ html.force-m tbody tr[data-key]{display:block!important;padding:0!important;marg
 .aw-win{border-color:color-mix(in srgb,#f4c430 45%,var(--line));background:color-mix(in srgb,#f4c430 8%,var(--surface))}
 .aw-t{min-width:0}.aw-t b{font-size:.92rem}
 .aw-m{display:flex;flex-wrap:wrap;align-items:center;gap:5px;margin-top:5px}
+.aw-team{font-size:.8rem;color:var(--muted);margin-top:2px}.aw-team b{color:var(--ink);font-size:.82rem}
 .aw-m small{color:var(--muted);font-size:.7rem;margin-right:2px}
 .person.mate{padding:3px 9px 3px 3px;font-size:.78rem}.person.mate .wi{width:20px;height:20px}
 .mate-off{font-size:.78rem;color:var(--muted);padding:3px 8px;border:1px dashed var(--line);border-radius:999px}
@@ -731,7 +734,7 @@ function parse(table){
   const hasFlag = table.rows.some(r=>str((r.c||[])[C.flag])==="抽出");
   const GRID = DAYS.map(d=>labels.findIndex(l=>l.indexOf("浮上")>=0 && (l.indexOf("["+d+"]")>=0 || l.indexOf("［"+d+"］")>=0)));
   // 更新は「変えた項目だけ」回答する運用：同じ名前の回答を古い順に重ね、空欄は前の値を引き継ぐ
-  const CLEAR = /^(なし|無し|ナシ|-|ー|−|―|—|削除)$/;   // この値が入っていたら、その項目を空にする
+  const CLEAR = /^(なし|無し|ナシ|-|ー|−|―|—|削除|消去|消去する)$/;   // この値が入っていたら、その項目を空にする
   const FIELDS = ["power","main","sub1","sub2","other","x","fc"];
   const groups = new Map();
   for(const r of table.rows){
@@ -844,7 +847,7 @@ function setResults(list){
   RESULTS = {};
   (list || []).forEach((r, idx)=>{
     const keys = r.names.map(n=>norm(n));
-    keys.forEach((k, i)=>{ (RESULTS[k] = RESULTS[k] || []).push({ title: r.title, type: resultType(r.title), mates: r.names.filter((_, j)=>j!==i), idx }); });
+    keys.forEach((k, i)=>{ (RESULTS[k] = RESULTS[k] || []).push({ title: r.title, team: r.team || "", type: resultType(r.title), mates: r.names.filter((_, j)=>j!==i), idx }); });
   });
 }
 function awardsOf(m){ return RESULTS[m.key] || []; }
@@ -859,10 +862,10 @@ function mobileCard(m, isNew){
   const subs = [m.sub1, m.sub2].filter(Boolean).map((w,i)=>`<span class="msub">${wIcon(w, catOf(w), "xs")}${esc(w)}</span>`).join("");
   const pk = st.picked.has(m.key);
   return `<div class="mc"><button class="mck${pk?' on':''}" data-mpick="${esc(m.key)}" aria-label="${pk?'選択を外す':'選択する'}">✓</button>${rk}${wIcon(m.main, m.mainCat, "md")}
-    <div class="mt"><b>${isFav(m)?'<i class="mfav">★</i>':''}${esc(m.name)}${onlineNow(m)?'<i class="mon" title="今は主な浮上時間帯です"></i>':''}${isNew?'<span class="newb">NEW</span>':''}</b>
+    <div class="mt"><b>${esc(m.name)}${onlineNow(m)?'<i class="mon" title="今は主な浮上時間帯です"></i>':''}${isNew?'<span class="newb">NEW</span>':''}</b>
       <small class="mw">${esc(m.main) || "メインブキ未登録"}</small>
       ${subs ? `<small class="ms">${subs}</small>` : ""}</div>
-    <span class="mp">${m.power || "–"}</span></div>`;
+    <span class="mp">${m.power || "–"}</span><button class="fav mfavb${isFav(m)?' on':''}" data-fav="${esc(m.key)}" aria-label="${isFav(m)?'お気に入りから外す':'お気に入りに追加'}">${isFav(m)?'★':'☆'}</button></div>`;
 }
 const avg = a => a.length ? (a.reduce((x,y)=>x+y,0)/a.length) : NaN;
 const fmt = n => isNaN(n) ? "–" : (Math.round(n*10)/10).toString();
@@ -910,7 +913,20 @@ function render(){
   $("pickAll").checked = shown.length>0 && shown.every(m=>st.picked.has(m.key));
   $("mPickAll").textContent = $("pickAll").checked ? "選択をすべて外す" : "表示中を全選択";
   renderSel(); save();
+  if(isMobileView()) fitMobileText();
 }
+/* スマホ版：長いブキ名は、入りきるまで文字を小さくする（それでも入らないときだけ「…」） */
+function fitMobileText(){
+  document.querySelectorAll("#rows .msub, #rows .mt .mw").forEach(el=>{
+    el.style.fontSize = "";
+    if(el.scrollWidth <= el.clientWidth) return;
+    let fs = parseFloat(getComputedStyle(el).fontSize);
+    const min = 7;
+    while(el.scrollWidth > el.clientWidth && fs > min){ fs -= 0.5; el.style.fontSize = fs + "px"; }
+    if(fs > min){ fs -= 0.5; el.style.fontSize = fs + "px"; }   /* 端数で「…」が出ないよう、もう一段だけ小さく */
+  });
+}
+addEventListener("resize", ()=>{ clearTimeout(fitMobileText.t); fitMobileText.t = setTimeout(()=>{ if(isMobileView()) fitMobileText(); }, 150); });
 function renderSel(){
   const sel = members.filter(m=>st.picked.has(m.key));
   $("selbar").classList.toggle("show", sel.length>0);
@@ -1119,7 +1135,7 @@ function awardsSection(m){
   const sorted = list.slice().sort((a,b)=>order[a.type]-order[b.type] || a.idx-b.idx);
   const mate = n => { const k = norm(n), mm = members.find(x=>x.key===k); return mm ? `<span class="person mate" data-key="${esc(mm.key)}">${wIcon(mm.main,mm.mainCat,"sm")}<b>${esc(mm.name)}</b></span>` : `<span class="mate-off">${esc(n)}</span>`; };
   return `<div class="pf-sec"><h3>大会実績${winsOf(m)?`<span class="aw-sum">優勝 ${winsOf(m)}回</span>`:""}</h3><div class="aw">${sorted.map(a=>`
-    <div class="aw-i aw-${a.type}"><span class="aw-ic">${TROPHY_SVG}</span><div class="aw-t"><b>${esc(a.title)}</b>${a.mates.length?`<div class="aw-m"><small>チーム</small>${a.mates.map(mate).join("")}</div>`:""}</div></div>`).join("")}</div></div>`;
+    <div class="aw-i aw-${a.type}"><span class="aw-ic">${TROPHY_SVG}</span><div class="aw-t"><b>${esc(a.title)}</b>${a.team?`<div class="aw-team">チーム名：<b>${esc(a.team)}</b></div>`:""}${a.mates.length?`<div class="aw-m"><small>メンバー</small>${a.mates.map(mate).join("")}</div>`:""}</div></div>`).join("")}</div></div>`;
 }
 function personChip(m){ return `<span class="person" data-key="${esc(m.key)}">${wIcon(m.main,m.mainCat,"sm")}<b>${esc(m.name)}</b><span>${m.power||"–"}</span></span>`; }
 function wtile(slot, w, extra){
@@ -1251,7 +1267,7 @@ document.addEventListener("keydown", e=>{
 let lpTimer = null, lpFired = false, lpStart = null;
 function togglePick(key){ st.picked.has(key) ? st.picked.delete(key) : st.picked.add(key); render(); try{ navigator.vibrate && navigator.vibrate(15); }catch(_e){} }
 $("rows").addEventListener("touchstart", e=>{
-  const tr = e.target.closest("tr[data-key]"); if(!tr || !isMobileView() || e.target.closest("[data-mpick]")) return;
+  const tr = e.target.closest("tr[data-key]"); if(!tr || !isMobileView() || e.target.closest("[data-mpick],[data-fav]")) return;
   lpFired = false; lpStart = [e.touches[0].clientX, e.touches[0].clientY];
   clearTimeout(lpTimer); lpTimer = setTimeout(()=>{ lpFired = true; togglePick(tr.dataset.key); }, 500);
 }, {passive:true});
@@ -1425,7 +1441,7 @@ function formUrlFor(m){ return m ? (FORM_PREFILL || FORM_NAME_URL).split("NSNAME
 function openForm(m){ window.open(formUrlFor(m), "_blank", "noopener"); }
 function updateSection(m){
   return `<div class="pf-sec pf-upd"><h3>情報の更新</h3>
-    <p>XP・ブキ・浮上時間帯などが変わったら、フォームで<b>変わった項目だけ</b>回答してください。空欄の項目は今の内容のまま残ります。</p>
+    <p>XP・ブキ・浮上時間帯などが変わったら、フォームで<b>変わった項目だけ</b>回答してください。空欄の項目は今の内容のまま残ります。今入っている内容を消したいときは「消去」を選んでください。</p>
     <button class="primary" data-act="form">名前入りの更新フォームを開く</button>
     ${m.updTs ? `<small>最終更新 ${fmtD(m.updTs, true)}${isStale(m) ? `（${staleDays(m)}日前）` : ""}</small>` : ""}</div>`;
 }
