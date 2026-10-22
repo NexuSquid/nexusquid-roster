@@ -523,6 +523,20 @@ body.has-sel .wrap{padding-bottom:210px}
 .g-pre{display:flex;gap:6px;flex-wrap:wrap}
 @media (max-width:760px){html:not(.force-pc) .tools{flex-wrap:nowrap;overflow-x:auto;margin:0 -12px 10px;padding:0 12px 2px;scrollbar-width:none}html:not(.force-pc) .tools::-webkit-scrollbar{display:none}html:not(.force-pc) .tbtn{flex:0 0 auto;font-size:.8rem;padding:7px 12px}html:not(.force-pc) .tl-back{padding:0}html:not(.force-pc) .tl{border-radius:0;min-height:100%}html:not(.force-pc) .tl-body{padding:12px 12px 24px;gap:10px}html:not(.force-pc) .tl-head{padding:10px 12px}html:not(.force-pc) .hc{height:28px;font-size:.66rem}html:not(.force-pc) .hg .hh{font-size:.52rem}html:not(.force-pc) .cb-row{grid-template-columns:84px minmax(0,1fr) 64px}html:not(.force-pc) body.has-sel .totop{bottom:170px}}
 html.force-m .tools{flex-wrap:nowrap;overflow-x:auto;margin:0 -12px 10px;padding:0 12px 2px;scrollbar-width:none}html.force-m .tools::-webkit-scrollbar{display:none}html.force-m .tbtn{flex:0 0 auto;font-size:.8rem;padding:7px 12px}html.force-m .tl-back{padding:0}html.force-m .tl{border-radius:0;min-height:100%;max-width:440px}html.force-m .tl-body{padding:12px 12px 24px;gap:10px}html.force-m .tl-head{padding:10px 12px}html.force-m .hc{height:28px;font-size:.66rem}html.force-m .hg .hh{font-size:.52rem}html.force-m .cb-row{grid-template-columns:84px minmax(0,1fr) 64px}html.force-m body.has-sel .totop{bottom:170px}
+/* ---- 隠しテーマ「ネオン」 ---- */
+html.neon[data-theme]{--bg:#0b0820;--surface:#15112e;--ink:#f5f3ff;--muted:#a9a3d9;--line:#2d2657;--accent:#ff3cac;--accent-soft:#3a1740;--chip:#1d1840;--sel:#3a1f4f;--gold:#ffe14d;--new:#39ffd5;color-scheme:dark}
+html.neon body{background:radial-gradient(circle at 15% 0%,#2a0f4f 0,transparent 45%),radial-gradient(circle at 95% 25%,#0f3a4f 0,transparent 40%),var(--bg);background-attachment:fixed}
+html.neon h1{text-shadow:0 0 14px #ff3cac,0 0 2px #fff}
+html.neon .stat,html.neon .tablewrap,html.neon .panel,html.neon .pf-sec{box-shadow:0 0 0 1px rgba(255,60,172,.22),0 0 22px rgba(255,60,172,.07)}
+html.neon .tbtn.tform,html.neon button.primary{box-shadow:0 0 14px rgba(255,60,172,.55)}
+/* おみくじ */
+.omk{text-align:center;padding:18px 8px 6px;display:grid;gap:14px;justify-items:center}
+.omk-luck{font-size:2.4rem;font-weight:900;letter-spacing:.1em;background:linear-gradient(135deg,#ff3c8e,#8a5cff);-webkit-background-clip:text;color:transparent}
+.omk-roll{font-size:1.4rem;font-weight:800;min-height:2em;color:var(--muted)}
+.omk-res{display:grid;gap:12px;justify-items:center}
+.omk-l{font-size:.9rem;color:var(--muted)}
+.omk-res .person{font-size:1.1rem;padding:8px 16px 8px 8px}.omk-res .person .wi,.omk-res .person .avp{width:34px;height:34px}
+.omk-m{font-weight:700}
 </style>
 <script>
 /* ▼▼ ここに Apps Script のウェブアプリのURL（…/exec で終わるもの）を貼り付けてください ▼▼ */
@@ -598,8 +612,8 @@ setTimeout(function(){
         <option value="name:asc">名前 あいうえお順</option>
         <option value="cat:asc">メインブキ種順</option>
         <option value="main:asc">メインブキ名順</option>
-        <option value="ts:desc">登録 新しい順</option>
-        <option value="ts:asc">登録 古い順</option>
+        <option value="join:desc">加入 新しい順</option>
+        <option value="join:asc">加入 古い順</option>
       </select>
       <button id="ftoggle" class="ftoggle">詳しい条件<span class="badge" id="fcount"></span></button>
       <button id="clear">条件リセット</button>
@@ -720,7 +734,7 @@ function showLocalCache(){
     const c = JSON.parse(localStorage.getItem(LOCAL_KEY) || "null");
     if(!c || !c.d || !c.d.data) return false;
     lastData = JSON.stringify(c.d);
-    setResults(c.d.results); setFormInfo(c.d.form); setIcons(c.d.icons);
+    setResults(c.d.results); setFormInfo(c.d.form); setIcons(c.d.icons); setJoins(c.d.joins);
     parse(toTable(c.d.data));
     if(c.d.images && typeof applyImages === "function") applyImages(c.d.images);
     setStatus("load", "前回（" + new Date(c.t).toLocaleString("ja-JP",{month:"numeric",day:"numeric",hour:"2-digit",minute:"2-digit"}) + "）のデータを表示中・最新を読み込み中…");
@@ -744,7 +758,7 @@ function load(){
       const sig = JSON.stringify(d);
       if(sig === lastData){ lastLoaded = Date.now(); setStatus("ok", "最終更新 " + new Date().toLocaleTimeString("ja-JP")); try{ localStorage.setItem(LOCAL_KEY, JSON.stringify({t: lastLoaded, d: d})); }catch(_e){} return; }
       lastData = sig;
-      setResults(d.results); setFormInfo(d.form); setIcons(d.icons);
+      setResults(d.results); setFormInfo(d.form); setIcons(d.icons); setJoins(d.joins);
       parse(toTable(d.data));
       lastLoaded = Date.now();
       setStatus("ok", "最終更新 " + new Date().toLocaleTimeString("ja-JP"));
@@ -800,13 +814,13 @@ function parse(table){
   const C = {
     ts: find(["タイムスタンプ"],0), name: find(["名前"],1), power: find(["最高パワー"],2), main: find(["メインブキ"],3),
     sub1: find(["サブブキ1"],4), sub2: find(["サブブキ2"],5), other: find(["その他"],6),
-    x: find(["Twitter","XID"],7), fc: find(["フレンドコード"],8), flag: find(["列1"],11)
+    x: find(["Twitter","XID"],7), fc: find(["フレンドコード"],8), flag: find(["列1"],11), join: find(["加入"],-1)
   };
   const hasFlag = table.rows.some(r=>str((r.c||[])[C.flag])==="抽出");
   const GRID = DAYS.map(d=>labels.findIndex(l=>l.indexOf("浮上")>=0 && (l.indexOf("["+d+"]")>=0 || l.indexOf("［"+d+"］")>=0)));
   // 更新は「変えた項目だけ」回答する運用：同じ名前の回答を古い順に重ね、空欄は前の値を引き継ぐ
   const CLEAR = /^(なし|無し|ナシ|-|ー|−|―|—|削除|消去|消去する)$/;   // この値が入っていたら、その項目を空にする
-  const FIELDS = ["power","main","sub1","sub2","other","x","fc"];
+  const FIELDS = ["power","main","sub1","sub2","other","x","fc","join"];
   const groups = new Map();
   for(const r of table.rows){
     const c = r.c || [];
@@ -845,7 +859,7 @@ function parse(table){
       power: parseFloat(cur.power) || 0,
       ts: g.rows[0].ts, updTs: last.ts,       // ts＝最初の登録日、updTs＝最後に更新した日
       main: cur.main||"", sub1: cur.sub1||"", sub2: cur.sub2||"", other: cur.other||"",
-      xRaw: cur.x||"", x: xId(cur.x||""), fc: cur.fc||"",
+      xRaw: cur.x||"", x: xId(cur.x||""), fc: cur.fc||"", joinRaw: cur.join||"",
       sched: cur.sched || null, log: log
     };
     m.mainCat = catOf(m.main);
@@ -909,12 +923,23 @@ function sorted(list){
     cat:(a,b)=>ci(a.mainCat)-ci(b.mainCat)||b.power-a.power,
     ts:(a,b)=>a.ts-b.ts
   }[k];
+  if(k === "join"){   /* 加入日：加入日がない人は、どちらの向きでも最後 */
+    const has = list.filter(m=>joinTs(m)), none = list.filter(m=>!joinTs(m));
+    return has.sort((a,b)=>d*(joinTs(a)-joinTs(b)) || b.power-a.power).concat(none.sort((a,b)=>b.power-a.power));
+  }
   return [...list].sort((a,b)=>d*f(a,b));
 }
 
 /* ---------- 描画 ---------- */
 /* ---------- 個人アイコン（GitHubの icons フォルダ／シート「アイコン」で名前とファイル名を対応づけ） ---------- */
-let ICON_MAP = {}, COLOR_MAP = {};
+let ICON_MAP = {}, COLOR_MAP = {}, JOIN_MAP = {};
+/* 加入日：スプレッドシートの「加入日」シート（なければ「アイコン」シートのD列、フォームの「加入日」の列）。
+   「2026/4/1」「2026-04-01」「2026年4月1日」などを読む */
+let JOIN_SHEET = {};
+function setJoins(list){ JOIN_SHEET = {}; (list || []).forEach(r=>{ const t = parseYMD(r[1]); if(r[0] && t) JOIN_SHEET[norm(r[0])] = t; }); }
+function parseYMD(v){ const p = String(v || "").normalize("NFKC").match(/(\d{4})\D+(\d{1,2})\D+(\d{1,2})/); return p ? new Date(+p[1], +p[2]-1, +p[3]).getTime() : 0; }
+function joinTs(m){ return m ? (JOIN_SHEET[m.key] || JOIN_MAP[m.key] || parseYMD(m.joinRaw)) : 0; }
+function joinDays(m){ const t = joinTs(m); if(!t) return null; const n = new Date(); return Math.max(0, Math.round((new Date(n.getFullYear(), n.getMonth(), n.getDate()).getTime() - t) / DAY)); }
 /* カラーコード（#ff5c8a / ff5c8a / #f58 など）を #rrggbb にそろえる。読めなければ空 */
 function normColor(c){
   let t = String(c || "").normalize("NFKC").trim().replace(/^#/, "").toLowerCase();
@@ -922,10 +947,11 @@ function normColor(c){
   return /^[0-9a-f]{6}$/.test(t) ? "#" + t : "";
 }
 function setIcons(list){
-  ICON_MAP = {}; COLOR_MAP = {};
+  ICON_MAP = {}; COLOR_MAP = {}; JOIN_MAP = {};
   (list || []).forEach(r=>{ if(!r[0]) return; const k = norm(r[0]), f = String(r[1] || "").trim(), c = normColor(r[2]);
     if(f) ICON_MAP[k] = /^https:/.test(f) ? f : "icons/" + f.split("/").map(encodeURIComponent).join("/");
-    if(c) COLOR_MAP[k] = c; });
+    if(c) COLOR_MAP[k] = c;
+    const j = parseYMD(r[3]); if(j) JOIN_MAP[k] = j; });
   syncIconCache();
 }
 function colorOf(m){ return (m && COLOR_MAP[m.key]) || ""; }
@@ -1025,7 +1051,7 @@ function render(){
     const w = s => s ? `<span class="wlink" data-q="${esc(s)}">${esc(s)}</span>` : "";
     const subs = [m.sub1,m.sub2].filter(Boolean).map(w).join(" / ");
     const isNew = m.ts && now - m.ts < 7*DAY;
-    const date = m.ts ? new Date(m.ts).toLocaleDateString("ja-JP",{month:"numeric",day:"numeric"}) + " 登録" : "";
+    const jd = joinDays(m), date = jd != null ? `${fmtD(joinTs(m), true)} 加入・${jd}日` : "";
     const x = m.x ? `<a class="x" href="${X_URL}${m.x}" target="_blank" rel="noopener">@${esc(m.x)}</a>` : (m.xRaw ? esc(m.xRaw) : `<span class="none">—</span>`);
     const fc = m.fc ? `<span class="fc" data-copy="${esc(m.fc)}">${esc(m.fc)}</span><button class="copy" data-copy="${esc(m.fc)}" title="コピー">コピー</button>` : `<span class="none">—</span>`;
     const picked = st.picked.has(m.key);
@@ -1124,7 +1150,7 @@ const THEMES = ["auto","light","dark"], THEME_LABEL = {auto:"自動", light:"ラ
 function applyTheme(t){ if(t==="auto") document.documentElement.removeAttribute("data-theme"); else document.documentElement.setAttribute("data-theme", t); $("theme").textContent = "明るさ：" + THEME_LABEL[t]; }
 let theme = "auto"; try{ theme = localStorage.getItem("nsTheme") || "auto"; }catch(_e){}
 applyTheme(theme);
-$("theme").addEventListener("click", ()=>{ theme = THEMES[(THEMES.indexOf(theme)+1)%3]; applyTheme(theme); try{ localStorage.setItem("nsTheme", theme); }catch(_e){} });
+$("theme").addEventListener("click", ()=>{ theme = THEMES[(THEMES.indexOf(theme)+1)%THEMES.length]; applyTheme(theme); try{ localStorage.setItem("nsTheme", theme); }catch(_e){} });
 function paintIconSw(){ document.querySelectorAll("#iconSw button").forEach(b=>b.classList.toggle("on", (b.dataset.i==="off")===ICON_OFF)); }
 paintIconSw();
 $("iconSw").addEventListener("click", e=>{
@@ -1354,7 +1380,7 @@ function openProfile(m, keepScroll){
       ${avatar(m, "lg")}
       <div style="min-width:0">
         <div class="pf-name">${esc(m.name)}</div>
-        <div class="pf-sub">${getMe()===m.key?'<span class="tag me-tag">自分</span>':""}${isFav(m)?'<span class="tag">★ お気に入り</span>':""}${m.mainCat?`<span class="tag">${m.mainCat}使い</span>`:""}${winsOf(m)?`<span class="tag tag-win">${TROPHY_SVG}優勝 ${winsOf(m)}回</span>`:""}${isNew?'<span class="tag">NEW</span>':""}${date?`<span>${date} 登録</span>`:""}${m.updTs && m.updTs!==m.ts ? `<span>・${new Date(m.updTs).toLocaleDateString("ja-JP",{year:"numeric",month:"numeric",day:"numeric"})} 更新</span>`:""}${isStale(m)?`<span class="tag tag-stale">最終更新から${staleDays(m)}日</span>`:""}</div>
+        <div class="pf-sub">${getMe()===m.key?'<span class="tag me-tag">自分</span>':""}${isFav(m)?'<span class="tag">★ お気に入り</span>':""}${m.mainCat?`<span class="tag">${m.mainCat}使い</span>`:""}${winsOf(m)?`<span class="tag tag-win">${TROPHY_SVG}優勝 ${winsOf(m)}回</span>`:""}${isNew?'<span class="tag">NEW</span>':""}${joinTs(m)?`<span>${fmtD(joinTs(m), true)} 加入（加入から${joinDays(m)}日）</span>`:""}${m.updTs ? `<span>${joinTs(m)?"・":""}${new Date(m.updTs).toLocaleDateString("ja-JP",{year:"numeric",month:"numeric",day:"numeric"})} 更新</span>`:""}${isStale(m)?`<span class="tag tag-stale">最終更新から${staleDays(m)}日</span>`:""}</div>
       </div>
     </div>
     <div class="pf-contact">
@@ -1966,7 +1992,7 @@ function compareBody(){
     ${row("サブ 2", esc(a.sub2) || "–", esc(b.sub2) || "–", 0)}
     ${row("扱えるブキ種", a.allCats.join("・") || "–", b.allCats.join("・") || "–", 0)}
     ${row("サーバー内大会優勝", wins(a) + "回", wins(b) + "回", wins(a) - wins(b))}
-    ${row("登録日", date(a.ts), date(b.ts), 0)}
+    ${row("加入日", joinTs(a) ? date(joinTs(a)) + "（" + joinDays(a) + "日）" : "–", joinTs(b) ? date(joinTs(b)) + "（" + joinDays(b) + "日）" : "–", 0)}
     ${row("最終更新", date(a.updTs), date(b.updTs), 0)}</div>`;
   return `<div class="cmp-h">${head(a, "cmpA")}${head(b, "cmpB")}</div>
     <div class="pf-sec"><h3>基本情報</h3>${g}</div>
@@ -2195,6 +2221,150 @@ function onToolsData(){
   $("staleN").textContent = sn ? String(sn) : "";
   if(tlOpen() && tlRender && !$("tl").querySelector(".card-img")) tlRender();
 }
+</script>
+<script>
+/* =====================================================================
+   隠し機能（イースターエッグ）
+   ① ↑↑↓↓←→←→BA（スマホはタイトル長押し）：画面にインクが飛び散る
+   ② タイトル「メンバー名簿」を7回タップ：隠しテーマ「ネオン」解放（明るさボタンで選べる）
+   ③ 検索欄に「おみくじ」：今日の運勢
+   ④ 自分のページ：登録記念日・XPの節目を初めて開いたときにお祝い
+   ===================================================================== */
+const FX = (function(){
+  let cv = null;
+  function layer(){
+    if(cv) return cv;
+    cv = document.createElement("canvas");
+    cv.style.cssText = "position:fixed;inset:0;width:100vw;height:100vh;pointer-events:none;z-index:70";
+    document.body.appendChild(cv); return cv;
+  }
+  function run(draw, ms){
+    const c = layer(), dpr = Math.min(2, window.devicePixelRatio || 1);
+    c.width = innerWidth * dpr; c.height = innerHeight * dpr;
+    const ctx = c.getContext("2d"); ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    const t0 = performance.now();
+    (function frame(t){
+      const p = (t - t0) / ms;
+      ctx.clearRect(0, 0, innerWidth, innerHeight);
+      if(p >= 1){ c.remove(); cv = null; return; }
+      draw(ctx, p); requestAnimationFrame(frame);
+    })(t0);
+  }
+  const INK = ["#ff3c8e", "#2fd3ff", "#b6ff3a", "#ff8a1f", "#8a5cff"];
+  /* インクの飛び散り：丸い塊＋しずく＋垂れ */
+  function ink(){
+    const W = innerWidth, H = innerHeight, n = Math.round(Math.min(26, 10 + W*H/60000));
+    const blobs = [];
+    for(let i=0;i<n;i++){
+      const r = 24 + Math.random()*70, col = INK[i % INK.length];
+      const drops = []; for(let j=0;j<7;j++){ const a = Math.random()*Math.PI*2, d = r*(1.1+Math.random()*1.1); drops.push([Math.cos(a)*d, Math.sin(a)*d, 3 + Math.random()*r*.22]); }
+      blobs.push({x: Math.random()*W, y: Math.random()*H, r: r, col: col, delay: i/n*.35, drops: drops, drip: 30 + Math.random()*90});
+    }
+    run((ctx, p)=>{
+      blobs.forEach(b=>{
+        const q = Math.max(0, Math.min(1, (p - b.delay) / .12)); if(!q) return;
+        const fade = p > .7 ? 1 - (p - .7) / .3 : 1;
+        ctx.globalAlpha = .9 * fade; ctx.fillStyle = b.col;
+        ctx.beginPath(); ctx.arc(b.x, b.y, b.r * q, 0, Math.PI*2); ctx.fill();
+        b.drops.forEach(d=>{ ctx.beginPath(); ctx.arc(b.x + d[0]*q, b.y + d[1]*q, d[2], 0, Math.PI*2); ctx.fill(); });
+        const dl = b.drip * Math.max(0, Math.min(1, (p - b.delay - .1) / .5));
+        ctx.fillRect(b.x - b.r*.12, b.y, b.r*.24, dl); ctx.beginPath(); ctx.arc(b.x, b.y + dl, b.r*.16, 0, Math.PI*2); ctx.fill();
+      });
+      ctx.globalAlpha = 1;
+    }, 2600);
+  }
+  /* 紙吹雪 */
+  function confetti(){
+    const W = innerWidth, ps = [];
+    for(let i=0;i<120;i++) ps.push({x: Math.random()*W, y: -20 - Math.random()*innerHeight*.6, vx: (Math.random()-.5)*1.6, vy: 2 + Math.random()*3.5, s: 6 + Math.random()*7, r: Math.random()*6, vr: (Math.random()-.5)*.3, col: INK[i % INK.length]});
+    run((ctx, p)=>{
+      ps.forEach(o=>{ o.x += o.vx; o.y += o.vy; o.r += o.vr;
+        ctx.save(); ctx.globalAlpha = p > .8 ? (1-p)/.2 : 1; ctx.translate(o.x, o.y); ctx.rotate(o.r); ctx.fillStyle = o.col; ctx.fillRect(-o.s/2, -o.s/4, o.s, o.s/2); ctx.restore(); });
+    }, 3200);
+  }
+  return { ink: ink, confetti: confetti };
+})();
+
+/* ---- ① コマンド ---- */
+(function(){
+  const SEQ = ["ArrowUp","ArrowUp","ArrowDown","ArrowDown","ArrowLeft","ArrowRight","ArrowLeft","ArrowRight","b","a"];
+  let pos = 0;
+  document.addEventListener("keydown", e=>{
+    if(/INPUT|TEXTAREA|SELECT/.test(document.activeElement && document.activeElement.tagName)) return;
+    const k = e.key.length === 1 ? e.key.toLowerCase() : e.key;
+    pos = (k === SEQ[pos]) ? pos + 1 : (k === SEQ[0] ? 1 : 0);
+    if(pos === SEQ.length){ pos = 0; FX.ink(); toast("スプラッシュ！"); }
+  });
+})();
+
+/* ---- ①（スマホ：タイトル長押し）と ②（タイトル7回タップ） ---- */
+const NEON_KEY = "nsNeon";
+function neonUnlocked(){ try{ return localStorage.getItem(NEON_KEY) === "1"; }catch(_e){ return false; } }
+(function(){
+  const h = document.querySelector("header h1"); if(!h) return;
+  h.style.cursor = "default"; h.style.userSelect = "none"; h.style.webkitUserSelect = "none";
+  let lp = null, longFired = false, taps = [];
+  h.addEventListener("pointerdown", ()=>{ longFired = false; clearTimeout(lp); lp = setTimeout(()=>{ longFired = true; FX.ink(); toast("スプラッシュ！"); }, 900); });
+  ["pointerup","pointerleave","pointercancel"].forEach(t=>h.addEventListener(t, ()=>clearTimeout(lp)));
+  h.addEventListener("contextmenu", e=>e.preventDefault());
+  h.addEventListener("click", ()=>{
+    if(longFired){ longFired = false; return; }
+    const now = Date.now(); taps = taps.filter(t=>now - t < 4000); taps.push(now);
+    if(taps.length >= 7){
+      taps = [];
+      if(neonUnlocked()){ toast("ネオンはもう解放済みです（明るさボタンから選べます）"); return; }
+      try{ localStorage.setItem(NEON_KEY, "1"); }catch(_e){}
+      if(THEMES.indexOf("neon") < 0) THEMES.push("neon");
+      theme = "neon"; applyTheme("neon"); try{ localStorage.setItem("nsTheme", "neon"); }catch(_e){}
+      FX.confetti(); toast("隠しテーマ「ネオン」を見つけました！ 明るさボタンでいつでも切り替えられます");
+    }
+  });
+})();
+/* 明るさボタンに「ネオン」を追加（解放済みのときだけ） */
+THEME_LABEL.neon = "ネオン";
+if(neonUnlocked() && THEMES.indexOf("neon") < 0) THEMES.push("neon");
+applyTheme = function(t){
+  const h = document.documentElement;
+  if(t === "neon" && !neonUnlocked()) t = "auto";
+  h.classList.toggle("neon", t === "neon");
+  if(t === "auto") h.removeAttribute("data-theme"); else h.setAttribute("data-theme", t === "neon" ? "dark" : t);
+  $("theme").textContent = "明るさ：" + THEME_LABEL[t];
+};
+if(THEMES.indexOf(theme) < 0) theme = "auto";
+applyTheme(theme);
+
+/* ---- ③ 今日のおみくじ ---- */
+function hashStr(s){ let h = 2166136261; for(let i=0;i<s.length;i++){ h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return h >>> 0; }
+function omikuji(){
+  const d = new Date(), seed = d.getFullYear() + "-" + (d.getMonth()+1) + "-" + d.getDate() + "|" + (getMe() || "guest");
+  const LUCK = [["大吉","最高の一日！ 今日はどんどんバトルに出かけよう"],["中吉","いい流れ。いつものブキで実力を出し切れそう"],["吉","まずまず。ナワバリで肩慣らししてから行こう"],["小吉","焦らずいこう。味方との声かけが鍵"],["末吉","じっくり型の日。練習で着実にレベルアップ"]];
+  const L = LUCK[hashStr(seed) % LUCK.length];
+  openTool("今日のおみくじ", "1日1回、日付が変わると結果も変わります", ()=>`<div class="omk"><div class="omk-roll" id="omkRoll"></div>
+    <div class="omk-res" id="omkRes" hidden><div class="omk-luck">${L[0]}</div><div class="omk-m">${L[1]}</div></div></div>`);
+  const roll = $("omkRoll"); let i = 0;
+  const timer = setInterval(()=>{ if(!roll){ clearInterval(timer); return; } roll.textContent = LUCK[i++ % LUCK.length][0]; }, 80);
+  setTimeout(()=>{ clearInterval(timer); if(roll) roll.remove(); const r = $("omkRes"); if(r) r.hidden = false; if(L[0] === "大吉") FX.confetti(); }, 1300);
+}
+$("q").addEventListener("input", ()=>{
+  if(norm($("q").value.trim()) === norm("おみくじ")){ $("q").value = ""; $("q").blur(); $("sugg").classList.remove("show"); renderChips(); render(); omikuji(); }
+});
+
+/* ---- ④ 自分のページでのお祝い（登録記念日・XPの節目。それぞれ1回だけ） ---- */
+function celebrateCheck(m){
+  if(!m || m.key !== getMe()) return;
+  const once = k => { try{ if(localStorage.getItem(k)) return false; localStorage.setItem(k, "1"); return true; }catch(_e){ return false; } };
+  const now = new Date(), jt = joinTs(m), reg = jt ? new Date(jt) : null;
+  if(reg && reg.getMonth() === now.getMonth() && reg.getDate() === now.getDate() && now.getFullYear() > reg.getFullYear()){
+    const y = now.getFullYear() - reg.getFullYear();
+    if(once("nsCele_" + m.key + "_join_" + now.getFullYear())){ setTimeout(()=>{ FX.confetti(); toast(`加入 ${y}周年おめでとう！`); }, 400); return; }
+  }
+  const h = xpRecords(m); if(h.length < 2) return;
+  const prev = h[h.length-2].power, last = h[h.length-1].power;
+  const hit = Math.floor(last / 100) * 100;   /* 100刻み：前回より上の100の位をはじめて超えたら */
+  if(!(hit > prev)) return;
+  if(once("nsCele_" + m.key + "_xp_" + hit)) setTimeout(()=>{ FX.confetti(); toast(`XP ${hit} 突破おめでとう！`); }, 400);
+}
+(function(){ const o = openProfile; openProfile = function(m, keep){ o.apply(this, arguments); if(!keep) celebrateCheck(m); }; })();
 </script>
 </body>
 </html>
