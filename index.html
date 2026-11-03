@@ -155,6 +155,16 @@ body.pf-open{overflow:hidden}
 .pf-body{padding:18px;display:grid;gap:14px}
 .pf-sec{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:14px 16px}
 .pf-sec h3{margin:0 0 10px;font-size:.8rem;color:var(--muted);font-weight:700;letter-spacing:.04em}
+.pf-sec.fold>h3{cursor:pointer;display:flex;align-items:center;flex-wrap:wrap;gap:2px 0;user-select:none;-webkit-user-select:none;margin:-14px -16px 0;padding:14px 40px 10px 16px;position:relative;border-radius:16px}
+.pf-sec.fold>h3::after{content:"";position:absolute;right:18px;top:50%;width:7px;height:7px;border-right:2px solid currentColor;border-bottom:2px solid currentColor;transform:translateY(-30%) rotate(-135deg);transition:transform .15s;opacity:.75}
+.pf-sec.fold>h3:hover{color:var(--ink)}
+.pf-sec.fold>h3:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+.pf-sec.fold.closed>h3{margin-bottom:-14px;padding-bottom:14px}
+.pf-sec.fold.closed>h3::after{transform:translateY(-70%) rotate(45deg)}
+.pf-sec.fold.closed>:not(h3){display:none!important}
+html:not(.force-pc) .pf-sec.fold>h3{margin:-12px -14px 0;padding:12px 38px 10px 14px}
+html:not(.force-pc) .pf-sec.fold.closed>h3{margin-bottom:-12px;padding-bottom:12px}
+@media (min-width:761px){html:not(.force-m) .pf-sec.fold>h3{margin:-14px -16px 0;padding:14px 40px 10px 16px}html:not(.force-m) .pf-sec.fold.closed>h3{margin-bottom:-14px;padding-bottom:14px}}
 .wtiles{display:grid;grid-template-columns:1.3fr 1fr 1fr;gap:10px}
 .wtile{--cc:var(--c-none);border-radius:14px;padding:12px;background:color-mix(in srgb,var(--cc) 8%,var(--surface));border:1px solid color-mix(in srgb,var(--cc) 30%,var(--line));display:flex;flex-direction:column;gap:8px;cursor:pointer;min-width:0}
 .wtile:hover{border-color:var(--cc)}
@@ -448,6 +458,43 @@ body.has-sel .wrap{padding-bottom:210px}
 .chg b{color:var(--ink)}
 .gup{color:#16a34a;font-weight:800;font-variant-numeric:tabular-nums;white-space:nowrap}
 .gft{font-variant-numeric:tabular-nums;font-size:.85rem;white-space:nowrap}
+/* フェス */
+.fs-tm{display:inline-flex;align-items:center;gap:5px;font-size:.74rem;font-weight:700;border-radius:999px;padding:2px 9px 2px 7px;white-space:nowrap;background:color-mix(in srgb,var(--tc) 15%,var(--surface));border:1px solid color-mix(in srgb,var(--tc) 55%,transparent);color:var(--ink)}
+.fs-tm::before{content:"";width:9px;height:9px;border-radius:50%;background:var(--tc);flex:0 0 auto}
+.fs-list{display:grid;gap:8px}
+.fs-r{display:grid;grid-template-columns:1fr auto;gap:4px 12px;align-items:center;text-align:left;width:100%;font:inherit;color:inherit;background:color-mix(in srgb,var(--tc) 7%,var(--surface));border:1px solid var(--line);border-left:4px solid var(--tc);border-radius:12px;padding:10px 12px;cursor:pointer}
+.fs-r:hover{border-color:color-mix(in srgb,var(--tc) 50%,var(--line));border-left-color:var(--tc)}
+.fs-h{min-width:0;display:flex;flex-direction:column;gap:3px}
+.fs-d{font-size:.72rem;color:var(--muted);font-weight:700}
+.fs-t{font-weight:800;font-size:.9rem;line-height:1.35;overflow-wrap:anywhere}
+.fs-v{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.fs-v b{font-size:1.15rem}
+.fs-v small{display:block;font-size:.7rem;color:var(--muted)}
+.fs-meta{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:.74rem;color:var(--muted)}
+.fs-k{font-size:.72rem;font-weight:800;border-radius:999px;padding:2px 9px;background:color-mix(in srgb,#f59e0b 20%,var(--surface));color:color-mix(in srgb,#b45309 65%,var(--ink));white-space:nowrap}
+.fs-sum{font-size:.78rem;color:var(--muted);font-weight:700;margin-left:8px}
+.fs-sel{font:inherit;padding:8px 10px;border-radius:10px;border:1px solid var(--line);background:var(--surface);color:var(--ink);width:100%;max-width:560px;min-width:0}
+html .tl-body select.fs-sel{width:100%;flex:1 1 100%;max-width:560px;font-size:15px;padding:8px 10px}
+.fs-teams{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px}
+.fs-team{border-radius:12px;padding:10px 12px;background:color-mix(in srgb,var(--tc) 10%,var(--surface));border:1px solid color-mix(in srgb,var(--tc) 40%,var(--line));border-top:4px solid var(--tc)}
+.fs-team b{display:block;font-size:.95rem}
+.fs-team small{display:block;font-size:.74rem;color:var(--muted);font-variant-numeric:tabular-nums}
+.fs-seg .seg button{display:inline-flex;align-items:center;gap:5px}
+.fs-seg .seg i{width:9px;height:9px;border-radius:50%;background:var(--tc);display:inline-block}
+.fs-seg{display:flex;flex-wrap:wrap;gap:8px}
+.fs-seg .seg{flex-wrap:wrap}
+.tl-row .fs-val{margin-left:auto;text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.tl-row .fs-val b{font-size:1.05rem}
+.tl-row .fs-val small{display:block;font-size:.7rem;color:var(--muted)}
+.person.off{cursor:default;opacity:.85}
+.tl-body>*{min-width:0}
+.fs-row{flex-wrap:nowrap}
+.fs-row .tl-rk{flex:0 0 auto}
+.fs-row .person{min-width:6.5em;flex:0 1 auto;overflow:hidden}
+.fs-row .person b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+.fs-row .fs-tm{flex:0 4 auto;min-width:2.2em;overflow:hidden;text-overflow:ellipsis}
+.fs-row .fs-val{flex:0 0 auto;padding-left:4px}
+.tl-rk.top1{color:#d4a017}.tl-rk.top2{color:#9aa3ad}.tl-rk.top3{color:#b8733a}
 .tl-empty{padding:24px;text-align:center;color:var(--muted);font-size:.9rem}
 .tbtns{display:flex;gap:8px;flex-wrap:wrap}
 .hg{display:grid;gap:3px;align-items:center}
@@ -601,6 +648,7 @@ setTimeout(function(){
     <button class="tbtn" data-tool="growth">XPが伸びた人</button>
     <button class="tbtn" data-tool="stats">サーバー統計</button>
     <button class="tbtn" data-tool="stale">情報が古い人<span class="tn" id="staleN"></span></button>
+    <button class="tbtn" data-tool="fes" id="fesBtn" hidden>フェスランキング</button>
   </div>
 
   <div class="panel">
@@ -734,7 +782,7 @@ function showLocalCache(){
     const c = JSON.parse(localStorage.getItem(LOCAL_KEY) || "null");
     if(!c || !c.d || !c.d.data) return false;
     lastData = JSON.stringify(c.d);
-    setResults(c.d.results); setFormInfo(c.d.form); setIcons(c.d.icons); setJoins(c.d.joins);
+    setResults(c.d.results); setFormInfo(c.d.form); setIcons(c.d.icons); setJoins(c.d.joins); setFes(c.d.fes);
     parse(toTable(c.d.data));
     if(c.d.images && typeof applyImages === "function") applyImages(c.d.images);
     setStatus("load", "前回（" + new Date(c.t).toLocaleString("ja-JP",{month:"numeric",day:"numeric",hour:"2-digit",minute:"2-digit"}) + "）のデータを表示中・最新を読み込み中…");
@@ -758,7 +806,7 @@ function load(){
       const sig = JSON.stringify(d);
       if(sig === lastData){ lastLoaded = Date.now(); setStatus("ok", "最終更新 " + new Date().toLocaleTimeString("ja-JP")); try{ localStorage.setItem(LOCAL_KEY, JSON.stringify({t: lastLoaded, d: d})); }catch(_e){} return; }
       lastData = sig;
-      setResults(d.results); setFormInfo(d.form); setIcons(d.icons); setJoins(d.joins);
+      setResults(d.results); setFormInfo(d.form); setIcons(d.icons); setJoins(d.joins); setFes(d.fes);
       parse(toTable(d.data));
       lastLoaded = Date.now();
       setStatus("ok", "最終更新 " + new Date().toLocaleTimeString("ja-JP"));
@@ -1421,6 +1469,7 @@ function openProfile(m, keepScroll){
       ${histogram(m)}
     </div>
     ${awardsSection(m)}
+    ${fesSection(m)}
     <div class="pf-sec">
       <h3>つながり</h3>
       ${sameMain.length?`<div class="sub-h">同じメインブキ（${esc(m.main)}）</div><div class="people">${sameMain.map(personChip).join("")}</div>`:""}
@@ -1438,12 +1487,30 @@ function openProfile(m, keepScroll){
       <button data-act="pick">${st.picked.has(m.key)?"選択を外す":"名簿で選択する"}</button>
     </div>
   </div>`; });
+  pfFold();
   $("pfback").classList.add("show"); document.body.classList.add("pf-open");
   if(!keepScroll) $("pfback").scrollTop = 0;
   const h = "#p=" + encodeURIComponent(m.name);
   if(GH && !navFromHandler){ try{ (pfShown ? GH.replace : GH.push)({pf:m.name}, null, h.slice(1)); }catch(_e){} } // スマホの「戻る」で閉じられるように
   pfShown = true;
 }
+/* 個人ページの項目（大会実績・つながりなど）は見出しを押すと開け閉めできる。閉じた項目はこの端末で覚えておく */
+let PF_CLOSED = {}; try{ PF_CLOSED = JSON.parse(localStorage.getItem("nsPfClosed") || "{}") || {}; }catch(_e){ PF_CLOSED = {}; }
+function secName(h){ const n = h.firstChild; return String(n && n.nodeType === 3 ? n.nodeValue : h.textContent).trim(); }
+function pfFold(){
+  document.querySelectorAll("#pf .pf-body > .pf-sec").forEach(sec=>{
+    const h = sec.firstElementChild; if(!h || h.tagName !== "H3") return;
+    const k = secName(h); sec.classList.add("fold"); sec.classList.toggle("closed", !!PF_CLOSED[k]);
+    h.setAttribute("role", "button"); h.setAttribute("tabindex", "0"); h.setAttribute("aria-expanded", PF_CLOSED[k] ? "false" : "true");
+  });
+}
+function pfToggle(h){
+  const sec = h.parentNode, k = secName(h), closed = !sec.classList.contains("closed");
+  sec.classList.toggle("closed", closed); h.setAttribute("aria-expanded", closed ? "false" : "true");
+  if(closed) PF_CLOSED[k] = 1; else delete PF_CLOSED[k];
+  try{ localStorage.setItem("nsPfClosed", JSON.stringify(PF_CLOSED)); }catch(_e){}
+}
+$("pf").addEventListener("keydown", e=>{ const h = e.target.closest && e.target.closest(".pf-sec.fold > h3"); if(h && (e.key === "Enter" || e.key === " ")){ e.preventDefault(); pfToggle(h); } });
 function closeProfile(fromPop){
   if(!fromPop && GH){ try{ GH.push({}, null, ""); }catch(_e){} }
   pfShown = false; cur=null; $("pfback").classList.remove("show","scrolled"); $("pfback").classList.remove("show"); if(!tlOpen()) document.body.classList.remove("pf-open"); }
@@ -1462,9 +1529,11 @@ let rsT; addEventListener("resize", ()=>{ clearTimeout(rsT); rsT = setTimeout(()
 $("pfback").addEventListener("click", e=>{
   const t = e.target;
   if(t===$("pfback") || t.closest("[data-close]")) return closeProfile();
+  const fh = t.closest(".pf-sec.fold > h3"); if(fh){ pfToggle(fh); return; }
   const nav = t.closest("[data-nav]"); if(nav){ const i=members.indexOf(cur); const m = members[i + (nav.dataset.nav==="next"?1:-1)]; if(m) openProfile(m); return; }
   const p = t.closest(".person"); if(p){ const m = members.find(x=>x.key===p.dataset.key); if(m) openProfile(m); return; }
   const c = t.closest("[data-copy]"); if(c){ copy(c.dataset.copy, "フレンドコードをコピーしました"); return; }
+  const fo = t.closest("[data-fesopen]"); if(fo){ fesSel = +fo.dataset.fesopen; fesTeam = "all"; openFes(); return; }
   const w = t.closest(".wtile[data-w]"); if(w){ closeProfile(); $("q").value = w.dataset.w; render(); $("q").scrollIntoView({block:"center"}); return; }
   const act = t.closest("[data-act]"); if(act){
     if(act.dataset.act==="form"){ openForm(cur); return; }
@@ -2208,11 +2277,81 @@ $("tlback").addEventListener("input", e=>{
   clearTimeout(cardT); cardT = setTimeout(()=>{ cardSave(); const m = members.find(x=>x.key===cardState.key); if(m) drawCard(m); }, 300);
 });
 
+/* ---------- フェスの記録・ランキング ---------- */
+let FES = [], fesSel = 0, fesTeam = "all", fesSort = "power";
+const FES_DEF = ["#ff8a00", "#7c3aed", "#10b981", "#e11d48"];
+function setFes(list){
+  FES = (list || []).map(f=>{
+    const teams = (f.teams || []).map((t, i)=>({ name: t[0], color: normColor(t[1]) || FES_DEF[i % FES_DEF.length] }));
+    const rows = (f.rows || []).map(r=>({ name: r[0], key: norm(r[0]), team: r[1] || "", power: +r[2] || 0, k100: +r[3] || 0 }));
+    return { title: f.title || "", date: f.date || "", start: f.start || 0, teams: teams, rows: rows };
+  });
+  if(fesSel >= FES.length) fesSel = 0;
+  const b = $("fesBtn"); if(b) b.hidden = !FES.length;
+}
+function fesColor(f, team){ const t = f.teams.find(x=>x.name===team); return t ? t.color : "#9aa3ad"; }
+function fesChip(f, team){ return team ? `<span class="fs-tm" style="--tc:${fesColor(f, team)}">${esc(team)}</span>` : ""; }
+function fesDate(f){ return String(f.date || "").replace(/\s*[-ー−~～]\s*/g, "〜"); }
+/* 同じ値は同じ順位（1, 2, 2, 4…） */
+function fesRanked(list, val, asc){
+  const s = list.slice().sort((a,b)=>(asc ? val(a)-val(b) : val(b)-val(a)) || b.power-a.power || (a.k100||1e9)-(b.k100||1e9));
+  let rk = 0; return s.map((r, i)=>{ if(i === 0 || val(r) !== val(s[i-1])) rk = i + 1; return { r: r, rank: rk }; });
+}
+function fesRankOf(list, r, val){ const x = fesRanked(list.filter(y=>val(y) > 0), val).find(y=>y.r === r); return x ? x.rank : 0; }
+function fesOf(m){
+  const out = [];
+  FES.forEach((f, i)=>{
+    const r = f.rows.find(x=>x.key === m.key); if(!r) return;
+    const pw = x=>x.power, same = f.rows.filter(x=>x.team === r.team);
+    out.push({ f: f, i: i, r: r, all: fesRankOf(f.rows, r, pw), nAll: f.rows.filter(x=>x.power>0).length, team: fesRankOf(same, r, pw), nTeam: same.filter(x=>x.power>0).length });
+  });
+  return out;
+}
+function fesSection(m){
+  const list = fesOf(m); if(!list.length) return "";
+  const best = Math.max.apply(null, list.map(x=>x.r.power));
+  const rows = list.map(x=>`<button class="fs-r" style="--tc:${fesColor(x.f, x.r.team)}" data-fesopen="${x.i}" title="このフェスのランキングを見る">
+      <span class="fs-h"><span class="fs-d">${esc(fesDate(x.f))}</span><span class="fs-t">${esc(x.f.title)}</span></span>
+      <span class="fs-v">${x.r.power ? `<b>${fmt(x.r.power)}</b><small>最高フェスパワー</small>` : `<small>記録なし</small>`}</span>
+      <span class="fs-meta">${fesChip(x.f, x.r.team)}${x.r.k100 ? `<span class="fs-k">100ケツ ${x.r.k100}位</span>` : ""}${x.all ? `<span>全体 ${x.all}位/${x.nAll}人${x.team && x.r.team ? `・陣営内 ${x.team}位/${x.nTeam}人` : ""}</span>` : ""}</span>
+    </button>`).join("");
+  return `<div class="pf-sec"><h3>フェスの記録<span class="fs-sum">参加 ${list.length}回${best ? "・最高 " + fmt(best) : ""}</span></h3><div class="fs-list">${rows}</div></div>`;
+}
+function fesPerson(r){
+  const m = members.find(x=>x.key === r.key);
+  return m ? `<span class="person" data-key="${esc(m.key)}">${avatarSmall(m)}<b>${esc(m.name)}</b></span>` : `<span class="person off"><b>${esc(r.name)}</b></span>`;
+}
+function fesBody(){
+  const f = FES[fesSel]; if(!f) return `<div class="pf-sec"><div class="tl-empty">フェスの記録がありません</div></div>`;
+  if(fesTeam !== "all" && !f.teams.some(t=>t.name === fesTeam)) fesTeam = "all";
+  const sel = FES.length > 1 ? `<div class="row"><select class="fs-sel" data-tlc="fsel">${FES.map((x, i)=>`<option value="${i}"${i===fesSel?" selected":""}>${esc(fesDate(x))}　${esc(x.title)}</option>`).join("")}</select></div>` : "";
+  const teams = f.teams.map(t=>{
+    const l = f.rows.filter(r=>r.team === t.name), p = l.filter(r=>r.power>0).map(r=>r.power), ks = l.filter(r=>r.k100>0).map(r=>r.k100), k = ks.length ? Math.min.apply(null, ks) : 0;
+    return `<div class="fs-team" style="--tc:${t.color}"><b>${esc(t.name)}</b><small>${l.length}人・平均 ${p.length ? fmt(p.reduce((a,b)=>a+b,0)/p.length) : "–"}</small><small>最高 ${p.length ? fmt(Math.max.apply(null, p)) : "–"}</small>${k ? `<small>100ケツ 最高${k}位</small>` : ""}</div>`;
+  }).join("");
+  const tabs = `<span class="seg"><button data-tl="fteam" data-v="all" class="${fesTeam==="all"?"on":""}">全陣営</button>${f.teams.map(t=>`<button data-tl="fteam" data-v="${esc(t.name)}" class="${fesTeam===t.name?"on":""}" style="--tc:${t.color}"><i></i>${esc(t.name)}</button>`).join("")}</span>`;
+  const sorts = segBtns("fsort", [["power","フェスパワー順"],["k100","100ケツ順"]], fesSort);
+  /* 100ケツは順位なので小さいほど上 */
+  const val = fesSort === "k100" ? (r=>r.k100) : (r=>r.power);
+  const pool = f.rows.filter(r=>(fesTeam === "all" || r.team === fesTeam) && val(r) > 0);
+  const list = fesRanked(pool, val, fesSort === "k100");
+  const body = list.length ? list.map(x=>{
+    const r = x.r, main = fesSort === "k100" ? `<b>${r.k100}</b>位<small>${r.power ? "パワー " + fmt(r.power) : ""}</small>` : `<b>${fmt(r.power)}</b><small>${r.k100 ? "100ケツ " + r.k100 + "位" : ""}</small>`;
+    return `<div class="tl-row fs-row"><span class="tl-rk${x.rank<=3?" top"+x.rank:""}">${x.rank}</span>${fesPerson(r)}${fesTeam === "all" ? fesChip(f, r.team) : ""}<span class="fs-val">${main}</span></div>`;
+  }).join("") : `<div class="tl-empty">${fesSort === "k100" ? "100ケツの記録がありません" : "記録がありません"}</div>`;
+  return sel + `<div class="pf-sec"><h3>${esc(f.title)}</h3><p>${esc(fesDate(f))}・参加 ${f.rows.length}人</p><div class="fs-teams">${teams}</div></div>
+    <div class="fs-seg">${tabs}${sorts}</div><div class="pf-sec">${body}</div>`;
+}
+TL_ACTS.fsel = a=>{ fesSel = +a.value || 0; fesTeam = "all"; tlRender(); };
+TL_ACTS.fteam = a=>{ fesTeam = a.dataset.v; tlRender(); };
+TL_ACTS.fsort = a=>{ fesSort = a.dataset.v; tlRender(); };
+function openFes(){ if(!FES.length){ toast("フェスの記録がありません"); return; } openTool("フェスランキング", "最高フェスパワー・100ケツの順位", fesBody); }
+
 /* ---------- ボタンのつなぎ込み ---------- */
 $("tools").addEventListener("click", e=>{
   const b = e.target.closest("[data-tool]"); if(!b) return;
   if(!members.length){ toast("読み込み中です"); return; }
-  ({recent: openRecent, growth: openGrowth, stats: openStats, stale: openStale})[b.dataset.tool]();
+  ({recent: openRecent, growth: openGrowth, stats: openStats, stale: openStale, fes: openFes})[b.dataset.tool]();
 });
 $("selTeam").addEventListener("click", ()=>{ const n = selList().length; if(n < 4){ toast("チーム分けには4人以上選んでください（今は" + n + "人）"); return; } openTeam(); });
 $("selTime").addEventListener("click", ()=>{ const n = selList().length; if(n < 2){ toast("2人以上選んでください"); return; } openOverlap(); });
