@@ -145,6 +145,12 @@ body.pf-open{overflow:hidden}
 .pf-id{display:flex;gap:18px;align-items:center;position:relative;z-index:1}
 .pf-id .wi{background:rgba(255,255,255,.95);color:var(--cc);box-shadow:0 6px 18px rgba(0,0,0,.2)}
 .pf-name{font-size:1.8rem;font-weight:800;line-height:1.15;overflow-wrap:anywhere}
+.cf-badges{display:flex;flex-wrap:wrap;gap:6px}
+.cf-bdg{display:inline-flex;align-items:center;gap:5px;font-size:.8rem;font-weight:700;padding:4px 10px 4px 6px;border:1px solid var(--line);border-radius:999px;background:var(--bg);cursor:pointer}
+.cf-bdg img{width:22px;height:22px;object-fit:contain}
+.cf-bdg input{margin:0}
+.pf-badges{display:inline-flex;gap:6px;vertical-align:middle;margin-left:10px;flex-wrap:wrap;position:relative;top:-.08em}
+.bdg-img{width:1.15em;height:1.15em;object-fit:contain;display:block;cursor:pointer;filter:drop-shadow(0 1px 2px rgba(0,0,0,.25))}
 .pf-sub{opacity:.9;font-size:.85rem;margin-top:4px;display:flex;gap:8px;flex-wrap:wrap;align-items:center}
 .pf-sub .tag{background:rgba(255,255,255,.2);border-radius:999px;padding:1px 9px}
 .pf-kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:18px;position:relative;z-index:1}
@@ -782,7 +788,7 @@ function showLocalCache(){
     const c = JSON.parse(localStorage.getItem(LOCAL_KEY) || "null");
     if(!c || !c.d || !c.d.data) return false;
     lastData = JSON.stringify(c.d);
-    setResults(c.d.results); setFormInfo(c.d.form); setIcons(c.d.icons); setJoins(c.d.joins); setFes(c.d.fes);
+    setResults(c.d.results); setFormInfo(c.d.form); setBadges(c.d.badges); setIcons(c.d.icons); setJoins(c.d.joins); setFes(c.d.fes);
     parse(toTable(c.d.data));
     if(c.d.images && typeof applyImages === "function") applyImages(c.d.images);
     setStatus("load", "前回（" + new Date(c.t).toLocaleString("ja-JP",{month:"numeric",day:"numeric",hour:"2-digit",minute:"2-digit"}) + "）のデータを表示中・最新を読み込み中…");
@@ -806,7 +812,7 @@ function load(){
       const sig = JSON.stringify(d);
       if(sig === lastData){ lastLoaded = Date.now(); setStatus("ok", "最終更新 " + new Date().toLocaleTimeString("ja-JP")); try{ localStorage.setItem(LOCAL_KEY, JSON.stringify({t: lastLoaded, d: d})); }catch(_e){} return; }
       lastData = sig;
-      setResults(d.results); setFormInfo(d.form); setIcons(d.icons); setJoins(d.joins); setFes(d.fes);
+      setResults(d.results); setFormInfo(d.form); setBadges(d.badges); setIcons(d.icons); setJoins(d.joins); setFes(d.fes);
       parse(toTable(d.data));
       lastLoaded = Date.now();
       setStatus("ok", "最終更新 " + new Date().toLocaleTimeString("ja-JP"));
@@ -1002,6 +1008,32 @@ function setIcons(list){
     const j = parseYMD(r[3]); if(j) JOIN_MAP[k] = j; });
   syncIconCache();
 }
+/* バッジ：シート「バッジ」の A列=名前, B列=GitHubの badges フォルダのファイル名, C列=説明 */
+let BADGES = {};
+function setBadges(list){
+  BADGES = {};
+  (list || []).forEach(r=>{ if(!r || !r[0] || !r[1]) return; const k = norm(r[0]), f = String(r[1]).trim();
+    const url = /^https:/.test(f) ? f : "badges/" + f.split("/").map(encodeURIComponent).join("/");
+    const desc = String(r[2] || "").trim();
+    (BADGES[k] = BADGES[k] || []).push({ url: url, desc: desc, name: desc || f.replace(/\.[^.]+$/, "") }); });
+}
+/* 加入期間のバッジ：加入日から自動で付ける（達した期間のバッジをすべて）。画像は GitHub の badges フォルダ */
+const JOIN_BADGES = [   // [月数, ファイル名, 名前]（長い順）
+  [36, "join_3y.webp", "加入3年"], [24, "join_2y.webp", "加入2年"], [12, "join_1y.webp", "加入1年"],
+  [6, "join_6m.webp", "加入6ヶ月"], [3, "join_3m.webp", "加入3ヶ月"]
+];
+function joinBadges(m){
+  const t = joinTs(m); if(!t) return [];
+  const j = new Date(t), now = new Date();
+  let months = (now.getFullYear() - j.getFullYear()) * 12 + (now.getMonth() - j.getMonth());
+  if(now.getDate() < j.getDate()) months--;   // その月の加入日がまだ来ていない
+  return JOIN_BADGES.filter(x=>months >= x[0]).map(b=>({ url: "badges/" + b[1], name: b[2], desc: b[2] + "（" + fmtD(t, true) + " 加入）" }));
+}
+function badgesOf(m){ return joinBadges(m).concat((m && BADGES[m.key]) || []); }
+function badgeHtml(m){
+  const l = badgesOf(m); if(!l.length) return "";
+  return `<span class="pf-badges">${l.map(b=>`<img class="bdg-img" src="${esc(b.url)}" alt="${esc(b.desc || "バッジ")}" title="${esc(b.desc)}" data-bdesc="${esc(b.desc)}" loading="lazy" decoding="async" onerror="this.remove()">`).join("")}</span>`;
+}
 function colorOf(m){ return (m && COLOR_MAP[m.key]) || ""; }
 /* 色を白に寄せて明るくする（t：0〜1） */
 function tint(hex, t){ const n = parseInt(hex.slice(1), 16), c = v => Math.round(v + (255-v)*t).toString(16).padStart(2, "0");
@@ -1030,7 +1062,9 @@ if("serviceWorker" in navigator && (location.protocol === "https:" || location.h
 }
 function syncIconCache(){
   if(!swReady) return;
-  const urls = Object.keys(ICON_MAP).map(k=>new URL(ICON_MAP[k], location.href).href);
+  const urls = Object.keys(ICON_MAP).map(k=>new URL(ICON_MAP[k], location.href).href)
+    .concat([].concat.apply([], Object.keys(BADGES).map(k=>BADGES[k].map(b=>new URL(b.url, location.href).href))))
+    .concat(JOIN_BADGES.map(b=>new URL("badges/" + b[1], location.href).href));
   swReady.then(reg=>{ if(reg && reg.active) reg.active.postMessage({type: "icons", urls: urls}); });
 }
 /* 画像が読み込めなかったときは、元のブキアイコンに戻す */
@@ -1430,7 +1464,7 @@ function openProfile(m, keepScroll){
     <div class="pf-id">
       ${avatar(m, "lg")}
       <div style="min-width:0">
-        <div class="pf-name">${esc(m.name)}</div>
+        <div class="pf-name">${esc(m.name)}${badgeHtml(m)}</div>
         <div class="pf-sub">${getMe()===m.key?'<span class="tag me-tag">自分</span>':""}${isFav(m)?'<span class="tag">★ お気に入り</span>':""}${m.mainCat?`<span class="tag">${m.mainCat}使い</span>`:""}${winsOf(m)?`<span class="tag tag-win">${TROPHY_SVG}優勝 ${winsOf(m)}回</span>`:""}${isNew?'<span class="tag">NEW</span>':""}${joinTs(m)?`<span>${fmtD(joinTs(m), true)} 加入（加入から${joinDays(m)}日）</span>`:""}${m.updTs ? `<span>${joinTs(m)?"・":""}${new Date(m.updTs).toLocaleDateString("ja-JP",{year:"numeric",month:"numeric",day:"numeric"})} 更新</span>`:""}${isStale(m)?`<span class="tag tag-stale">最終更新から${staleDays(m)}日</span>`:""}</div>
       </div>
     </div>
@@ -1533,6 +1567,7 @@ $("pfback").addEventListener("click", e=>{
   const nav = t.closest("[data-nav]"); if(nav){ const i=members.indexOf(cur); const m = members[i + (nav.dataset.nav==="next"?1:-1)]; if(m) openProfile(m); return; }
   const p = t.closest(".person"); if(p){ const m = members.find(x=>x.key===p.dataset.key); if(m) openProfile(m); return; }
   const c = t.closest("[data-copy]"); if(c){ copy(c.dataset.copy, "フレンドコードをコピーしました"); return; }
+  const bd = t.closest("[data-bdesc]"); if(bd){ if(bd.dataset.bdesc) toast(bd.dataset.bdesc); return; }
   const fo = t.closest("[data-fesopen]"); if(fo){ fesSel = +fo.dataset.fesopen; fesTeam = "all"; openFes(); return; }
   const w = t.closest(".wtile[data-w]"); if(w){ closeProfile(); $("q").value = w.dataset.w; render(); $("q").scrollIntoView({block:"center"}); return; }
   const act = t.closest("[data-act]"); if(act){
@@ -2085,6 +2120,10 @@ function svgImg(inner, color){
   });
 }
 function loadImg(src){ return new Promise(res=>{ if(!src) return res(null); const im = new Image(); im.onload = ()=>res(im); im.onerror = ()=>res(null); im.src = src; }); }
+const CARD_BMAX = 8;
+function cardBadges(m){ return badgesOf(m).filter(b=>cardState.boff.indexOf(b.url) < 0).slice(0, CARD_BMAX); }
+/* 別のサイトのバッジ画像は、画像を保存できるよう CORS で読む（読めなければ描かない） */
+function loadBadge(src){ return new Promise(res=>{ const im = new Image(); if(/^https?:/.test(src) && new URL(src).origin !== location.origin) im.crossOrigin = "anonymous"; im.onload = ()=>res(im); im.onerror = ()=>res(null); im.src = src; }); }
 function rr(ctx, x, y, w, h, r){ ctx.beginPath(); ctx.moveTo(x+r, y); ctx.arcTo(x+w, y, x+w, y+h, r); ctx.arcTo(x+w, y+h, x, y+h, r); ctx.arcTo(x, y+h, x, y, r); ctx.arcTo(x, y, x+w, y, r); ctx.closePath(); }
 const CARD_FF = '"Hiragino Sans","Noto Sans JP","Yu Gothic UI",system-ui,sans-serif';
 function fitText(ctx, text, maxW, size, weight){
@@ -2102,9 +2141,9 @@ function wrapLines(ctx, text, maxW, maxLines){
   return out;
 }
 /* アイコン画像と一言は、この端末に人ごとに保存（次に作るときも残る） */
-const cardState = { key: "", img: "", comment: "", url: "", file: null };
-function cardLoad(k){ try{ const s = JSON.parse(localStorage.getItem("nsCard_" + k) || "null") || {}; return { img: s.img || "", comment: s.comment || "" }; }catch(_e){ return { img: "", comment: "" }; } }
-function cardSave(){ try{ localStorage.setItem("nsCard_" + cardState.key, JSON.stringify({ img: cardState.img, comment: cardState.comment })); }catch(_e){ toast("画像が大きすぎて、この端末に保存できませんでした（今回の作成には使えます）"); } }
+const cardState = { key: "", img: "", comment: "", boff: [], url: "", file: null };   // boff＝プロフィール画像に載せないバッジ（画像のパス）
+function cardLoad(k){ try{ const s = JSON.parse(localStorage.getItem("nsCard_" + k) || "null") || {}; return { img: s.img || "", comment: s.comment || "", boff: Array.isArray(s.boff) ? s.boff : [] }; }catch(_e){ return { img: "", comment: "", boff: [] }; } }
+function cardSave(){ try{ localStorage.setItem("nsCard_" + cardState.key, JSON.stringify({ img: cardState.img, comment: cardState.comment, boff: cardState.boff })); }catch(_e){ toast("画像が大きすぎて、この端末に保存できませんでした（今回の作成には使えます）"); } }
 function drawCard(m){
   /* 基調色：シート「アイコン」のC列に色があればその色、なければメインブキのブキ種の色 */
   const base = colorOf(m) || normColor(cssVar("--c-" + (CAT_KEY[m.mainCat] || "none"))) || "#5b3cf5";
@@ -2125,7 +2164,7 @@ function drawCard(m){
     font(700, 20); ctx.fillStyle = MUTED; ctx.textAlign = "left"; ctx.fillText(title, x + 22, y + 36);
   };
   const go = function(arr){
-    const mainIcon = arr[0], photo = arr[1], wIcons = arr.slice(2);
+    const mainIcon = arr[0], photo = arr[1], wIcons = arr.slice(2, 5), bImgs = arr.slice(5);
     ctx.textBaseline = "alphabetic"; ctx.textAlign = "left";
     ctx.fillStyle = "#f4f6fb"; ctx.fillRect(0, 0, W, H);
 
@@ -2144,7 +2183,16 @@ function drawCard(m){
       ctx.drawImage(photo, (photo.width - s)/2, (photo.height - s)/2, s, s, 61, 50, 106, 106); ctx.restore();
     } else if(mainIcon) ctx.drawImage(mainIcon, 72, 61, 84, 84);
     ctx.fillStyle = HEAD_TXT;
-    fitText(ctx, m.name, 680, 60, 900); ctx.fillText(m.name, 196, 108);
+    /* バッジがあるときは、名前の右に並べる（名前の幅を少し譲る） */
+    const bList = bImgs.filter(Boolean), BS = bList.length > 5 ? 38 : 46, bW = bList.length ? bList.length * (BS + 8) + 6 : 0;
+    fitText(ctx, m.name, Math.max(360, 730 - bW), 60, 900); ctx.fillText(m.name, 196, 108);
+    if(bList.length){
+      let bx = 196 + ctx.measureText(m.name).width + 16;
+      ctx.save(); ctx.shadowColor = "rgba(0,0,0,.25)"; ctx.shadowBlur = 4; ctx.shadowOffsetY = 1;
+      bList.forEach(im=>{ const r = Math.min(BS / im.width, BS / im.height), w = im.width * r, h = im.height * r;
+        ctx.drawImage(im, bx + (BS - w) / 2, 89 - BS / 2 + (BS - h) / 2, w, h); bx += BS + 8; });
+      ctx.restore();
+    }
     const tags = [m.mainCat ? m.mainCat + "使い" : "", winsOf(m) ? "サーバー内大会優勝 " + winsOf(m) + "回" : "", m.x ? "X @" + m.x : ""].filter(Boolean).join("　・　");
     if(tags){ fitText(ctx, tags, 700, 24, 700); ctx.globalAlpha = .92; ctx.fillText(tags, 198, 148); ctx.globalAlpha = 1; }
     ctx.fillStyle = light ? "rgba(255,255,255,.45)" : "rgba(255,255,255,.2)"; rr(ctx, 948, 50, 196, 106, 20); ctx.fill();
@@ -2235,12 +2283,14 @@ function drawCard(m){
     }, "image/png");
   };
   const run = () => Promise.all([svgImg(ICONS[CAT_KEY[m.mainCat] || "none"], cssVar("--c-" + (CAT_KEY[m.mainCat] || "none")) || color), loadImg(cardState.img || iconOf(m))]
-      .concat(weapons.map(wp=>wp[1] ? svgImg(ICONS[CAT_KEY[catOf(wp[1])] || "none"], catColor(wp[1])) : Promise.resolve(null)))).then(go);
+      .concat(weapons.map(wp=>wp[1] ? svgImg(ICONS[CAT_KEY[catOf(wp[1])] || "none"], catColor(wp[1])) : Promise.resolve(null)))
+      .concat(cardBadges(m).map(b=>loadBadge(b.url)))).then(go);
   if(document.fonts && document.fonts.ready) document.fonts.ready.then(run); else run();
 }
 function makeCard(m){
   const saved = cardLoad(m.key);
-  cardState.key = m.key; cardState.img = saved.img; cardState.comment = saved.comment;
+  cardState.key = m.key; cardState.img = saved.img; cardState.comment = saved.comment; cardState.boff = saved.boff;
+  const bl = badgesOf(m);
   openTool("プロフィール画像", "自己紹介やDiscordに貼るときに", ()=>`
     <img class="card-img" alt="${esc(m.name)}のプロフィール画像">
     <div class="pf-sec card-form">
@@ -2249,6 +2299,8 @@ function makeCard(m){
       <div class="cf-note">正方形（1:1）で表示されます。縦長・横長の画像は中央が切り抜かれます。</div>
       <label class="cf-row"><span>一言</span><input type="text" id="cardComment" data-tli="ccomment" maxlength="60" placeholder="例：エリア好きです！気軽に誘ってください" value="${esc(cardState.comment)}"></label>
       <div class="cf-note">60文字まで（長いときは折り返します）。画像と一言はこの端末に保存されます。</div>
+      ${bl.length ? `<div class="cf-row"><span>バッジ</span><span class="cf-ctl cf-badges">${bl.map(b=>`<label class="cf-bdg"><input type="checkbox" data-tlc="cbadge" data-id="${esc(b.url)}"${cardState.boff.indexOf(b.url) < 0 ? " checked" : ""}><img src="${esc(b.url)}" alt="" onerror="this.style.visibility='hidden'">${esc(b.name || "バッジ")}</label>`).join("")}</span></div>
+      <div class="cf-note">チェックを入れたバッジがプロフィール画像に載ります（${CARD_BMAX}個まで）。</div>` : ""}
     </div>
     <div class="tbtns"><a class="tbtn tform" id="cardDl" href="#" download="${esc(m.name)}_プロフィール.png">画像を保存</a><button class="tbtn" data-tl="cshare" id="cardShare" hidden>共有する</button></div>
     <div class="tsum">スマホでは画像を長押しして保存することもできます。</div>`);
@@ -2268,6 +2320,10 @@ TL_ACTS.cimg = a=>{
     const m = members.find(x=>x.key===cardState.key); if(m) drawCard(m);
   });
   rd.readAsDataURL(f);
+};
+TL_ACTS.cbadge = a=>{
+  const id = a.dataset.id; cardState.boff = cardState.boff.filter(x=>x !== id); if(!a.checked) cardState.boff.push(id);
+  cardSave(); const m = members.find(x=>x.key===cardState.key); if(m) drawCard(m);
 };
 TL_ACTS.cimgdel = ()=>{ cardState.img = ""; cardSave(); $("cardImgDel").hidden = true; const m = members.find(x=>x.key===cardState.key); if(m) drawCard(m); };
 let cardT = null;
