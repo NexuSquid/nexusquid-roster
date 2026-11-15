@@ -339,6 +339,29 @@ html.force-m .pf-fab{right:calc(50% - 208px)}
 .mc .newb{font-size:.6rem}
 .mck{flex:0 0 28px;width:28px;height:28px;margin:-4px -2px -4px -4px;border-radius:50%;border:2px solid color-mix(in srgb,var(--muted) 55%,transparent);background:var(--surface);color:transparent;padding:0;font-size:.85rem;font-weight:900;line-height:1;display:grid;place-items:center;cursor:pointer}
 .mt{overflow:hidden}.mt .ms{min-width:0}.msub{max-width:100%;overflow:hidden;text-overflow:ellipsis;display:inline-block}.msub .wi.xs{vertical-align:-3px;width:1.4em;height:1.4em}
+.chip.chip-rg{font-weight:700}
+.chip.chip-rg.rg-e{border-color:color-mix(in srgb,var(--rg-e) 55%,var(--line));color:var(--rg-e)}
+.chip.chip-rg.rg-w{border-color:color-mix(in srgb,var(--rg-w) 55%,var(--line));color:var(--rg-w)}
+.chip.chip-rg.on.rg-e{background:var(--rg-e);color:#fff}.chip.chip-rg.on.rg-w{background:var(--rg-w);color:#fff}
+.chip.chip-rg.on .n{opacity:.85}
+:root{--rg-e:#2563eb;--rg-w:#e0303f}
+.rgm{display:inline-grid;place-items:center;width:1.35em;height:1.35em;border-radius:5px;font-size:.68rem;font-weight:800;color:#fff;margin-left:6px;vertical-align:middle;line-height:1}
+.rgm.rg-e{background:var(--rg-e)}.rgm.rg-w{background:var(--rg-w)}
+.tag.tag-rg{color:#fff!important;font-weight:800}
+.tag.tag-rg.rg-e{background:var(--rg-e)!important}.tag.tag-rg.rg-w{background:var(--rg-w)!important}
+.rg-cols{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media (max-width:640px){.rg-cols{grid-template-columns:1fr}}
+.rg-side{border-radius:16px;padding:14px 16px;background:var(--surface);border:1px solid var(--line);border-top:5px solid var(--rc);min-width:0}
+.rg-side h3{margin:0 0 4px;font-size:1.1rem;color:var(--rc)}
+.rg-stat{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:.82rem;color:var(--muted);margin-bottom:8px;font-variant-numeric:tabular-nums}
+.rg-stat b{color:var(--ink);font-size:1rem}
+.rg-bar{display:flex;height:12px;border-radius:999px;overflow:hidden;background:var(--chip);margin:6px 0 4px}
+.rg-bar i{display:block;height:100%}
+.rg-row{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--line);min-width:0}
+.rg-row:last-child{border-bottom:none}
+.rg-row .person{min-width:0;overflow:hidden}
+.rg-row .person b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rg-row .p{margin-left:auto;font-weight:800;font-variant-numeric:tabular-nums}
 .chip.chip-fav{border-color:color-mix(in srgb,var(--gold) 55%,var(--line));color:var(--gold);font-weight:700}
 .chip.chip-fav.on{background:var(--gold);border-color:var(--gold);color:#fff}
 .chip.chip-fav.on .n{opacity:.85}
@@ -655,6 +678,7 @@ setTimeout(function(){
     <button class="tbtn" data-tool="stats">サーバー統計</button>
     <button class="tbtn" data-tool="stale">情報が古い人<span class="tn" id="staleN"></span></button>
     <button class="tbtn" data-tool="fes" id="fesBtn" hidden>フェスランキング</button>
+    <button class="tbtn" data-tool="region" id="rgBtn" hidden>東西決戦</button>
   </div>
 
   <div class="panel">
@@ -762,7 +786,7 @@ function norm(s){ return String(s).normalize("NFKC").toLowerCase().replace(/[ぁ
 const PRESETS = [["3200+",3200,null],["3000〜3199",3000,3199.9],["2800〜2999",2800,2999.9],["2600〜2799",2600,2799.9],["〜2599",null,2599.9]];
 const DAY = 864e5;
 let members = [], timer = null;
-const st = { cats:new Set(), picked:new Set() };
+const st = { cats:new Set(), picked:new Set(), region:"" };
 const $ = id => document.getElementById(id);
 const X_URL = "https:\/\/x.com/"; /* スラッシュ2つを直接書かないための書き方 */
 const esc = s => String(s).replace(/[&<>"']/g, ch=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[ch]));
@@ -788,7 +812,7 @@ function showLocalCache(){
     const c = JSON.parse(localStorage.getItem(LOCAL_KEY) || "null");
     if(!c || !c.d || !c.d.data) return false;
     lastData = JSON.stringify(c.d);
-    setResults(c.d.results); setFormInfo(c.d.form); setBadges(c.d.badges); setIcons(c.d.icons); setJoins(c.d.joins); setFes(c.d.fes);
+    setResults(c.d.results); setFormInfo(c.d.form); setBadges(c.d.badges); setRegions(c.d.regions); setIcons(c.d.icons); setJoins(c.d.joins); setFes(c.d.fes);
     parse(toTable(c.d.data));
     if(c.d.images && typeof applyImages === "function") applyImages(c.d.images);
     setStatus("load", "前回（" + new Date(c.t).toLocaleString("ja-JP",{month:"numeric",day:"numeric",hour:"2-digit",minute:"2-digit"}) + "）のデータを表示中・最新を読み込み中…");
@@ -812,7 +836,7 @@ function load(){
       const sig = JSON.stringify(d);
       if(sig === lastData){ lastLoaded = Date.now(); setStatus("ok", "最終更新 " + new Date().toLocaleTimeString("ja-JP")); try{ localStorage.setItem(LOCAL_KEY, JSON.stringify({t: lastLoaded, d: d})); }catch(_e){} return; }
       lastData = sig;
-      setResults(d.results); setFormInfo(d.form); setBadges(d.badges); setIcons(d.icons); setJoins(d.joins); setFes(d.fes);
+      setResults(d.results); setFormInfo(d.form); setBadges(d.badges); setRegions(d.regions); setIcons(d.icons); setJoins(d.joins); setFes(d.fes);
       parse(toTable(d.data));
       lastLoaded = Date.now();
       setStatus("ok", "最終更新 " + new Date().toLocaleTimeString("ja-JP"));
@@ -937,6 +961,7 @@ function renderChips(){
   const counts = Object.fromEntries(CATS.map(c=>[c, members.filter(m=>catsOf(m).includes(c)).length]));
   const favN = typeof isFav === "function" ? members.filter(isFav).length : 0, favOn = $("favOnly").checked;
   $("chips").innerHTML = (favN || favOn ? `<button class="chip chip-fav${favOn?' on':''}" data-favf="1" title="お気に入りにした人だけ表示">★ お気に入り<span class="n">${favN}</span></button>` : "") +
+    (typeof regionChips === "function" ? regionChips() : "") +
     `<button class="chip${st.cats.size?'':' on'}" data-cat="">すべて<span class="n">${members.length}</span></button>` +
     CATS.filter(c=>counts[c]).map(c=>`<button class="chip${st.cats.has(c)?' on':''}" data-cat="${c}">${c}<span class="n">${counts[c]}</span></button>`).join("");
   const pmin = $("pmin").value, pmax = $("pmax").value;
@@ -962,6 +987,7 @@ function filtered(){
     if($("nowOnline").checked && !onlineNow(m)) return false;
     if($("favOnly").checked && !isFav(m)) return false;
     if($("staleOnly").checked && !isStale(m)) return false;
+    if(st.region && regionOf(m) !== st.region) return false;
     if(inc.some(t=>!m.hay.includes(t))) return false;
     if(exc.some(t=>m.hay.includes(t))) return false;
     return true;
@@ -1121,7 +1147,7 @@ function render(){
   $("sShown").textContent = shown.length + "人";
   $("sShownAvg").textContent = fmt(avg(spw));
   $("shownM").textContent = `${shown.length}人を表示中` + (spw.length ? `（平均 ${fmt(avg(spw))}）` : "");
-  const nf = st.cats.size + (($("pmin").value||$("pmax").value)?1:0) + ["hasX","hasFC","newOnly","pickedOnly","nowOnline","favOnly","staleOnly"].filter(id=>$(id).checked).length + (slotAny()?1:0);
+  const nf = st.cats.size + (st.region?1:0) + (($("pmin").value||$("pmax").value)?1:0) + ["hasX","hasFC","newOnly","pickedOnly","nowOnline","favOnly","staleOnly"].filter(id=>$(id).checked).length + (slotAny()?1:0);
   $("fcount").textContent = nf || "";
 
   const [sk,sd] = $("sort").value.split(":");
@@ -1141,7 +1167,7 @@ function render(){
     return `<tr class="${picked?'picked':''}${th?' hasc':''}" data-key="${esc(m.key)}"${th?` style="--mc:${th.acc}"`:""}>
       <td class="ck"><input type="checkbox" class="pick" ${picked?"checked":""}></td>
       <td class="rank r${m.rank}">${m.rank}</td>
-      <td class="name"><button class="fav${isFav(m)?' on':''}" data-fav="${esc(m.key)}" title="${isFav(m)?'お気に入りから外す':'お気に入りに追加'}">${isFav(m)?'★':'☆'}</button>${iconOf(m)?`<img class="avs" src="${esc(iconOf(m))}" alt="" loading="lazy" decoding="async" onerror="this.remove()">`:""}<span class="nm" title="プロフィールを見る">${esc(m.name)}</span>${onlineNow(m)?'<span class="onl" title="今は主な浮上時間帯です"></span>':''}${isNew?'<span class="newb">NEW</span>':''}<div class="date">${date}</div></td>
+      <td class="name"><button class="fav${isFav(m)?' on':''}" data-fav="${esc(m.key)}" title="${isFav(m)?'お気に入りから外す':'お気に入りに追加'}">${isFav(m)?'★':'☆'}</button>${iconOf(m)?`<img class="avs" src="${esc(iconOf(m))}" alt="" loading="lazy" decoding="async" onerror="this.remove()">`:""}<span class="nm" title="プロフィールを見る">${esc(m.name)}</span>${typeof regionMark === "function" ? regionMark(m) : ""}${onlineNow(m)?'<span class="onl" title="今は主な浮上時間帯です"></span>':''}${isNew?'<span class="newb">NEW</span>':''}<div class="date">${date}</div></td>
       <td class="pw"><div class="power">${m.power || "–"}</div></td>
       <td class="w">${typeof wIcon==="function"?wIcon(m.main,m.mainCat,"sm"):""}<span class="main">${w(m.main)||"–"}</span>${m.mainCat?`<span class="cat" style="--cc:${catVar(m.mainCat)}" data-cat="${m.mainCat}">${m.mainCat}</span>`:""}${subs?`<div class="subs">${subs}</div>`:""}</td>
       <td class="o other">${esc(m.other)}</td>
@@ -1196,6 +1222,7 @@ $("pickAll").addEventListener("change", e=>{ shown.forEach(m=> e.target.checked 
 $("chips").addEventListener("click", e=>{
   const b = e.target.closest(".chip"); if(!b) return;
   if(b.dataset.favf){ $("favOnly").checked = !$("favOnly").checked; renderChips(); render(); return; }
+  if(b.dataset.rg){ st.region = st.region === b.dataset.rg ? "" : b.dataset.rg; renderChips(); render(); return; }
   const c = b.dataset.cat;
   if(!c) st.cats.clear(); else st.cats.has(c) ? st.cats.delete(c) : st.cats.add(c);
   renderChips(); render();
@@ -1220,7 +1247,7 @@ document.querySelectorAll("input[name=slot]").forEach(r=>r.addEventListener("cha
 $("favOnly").addEventListener("change", renderChips);
 $("clear2").addEventListener("click", ()=>$("clear").click());
 $("clear").addEventListener("click", ()=>{
-  $("q").value=""; $("pmin").value=""; $("pmax").value=""; st.cats.clear();
+  $("q").value=""; $("pmin").value=""; $("pmax").value=""; st.cats.clear(); st.region = "";
   ["andCats","hasX","hasFC","newOnly","pickedOnly","nowOnline","favOnly","staleOnly"].forEach(id=>$(id).checked=false);
   document.querySelector('input[name=slot][value=main]').checked = true; $("sort").value="power:desc";
   renderChips(); render();
@@ -1465,7 +1492,7 @@ function openProfile(m, keepScroll){
       ${avatar(m, "lg")}
       <div style="min-width:0">
         <div class="pf-name">${esc(m.name)}${badgeHtml(m)}</div>
-        <div class="pf-sub">${getMe()===m.key?'<span class="tag me-tag">自分</span>':""}${isFav(m)?'<span class="tag">★ お気に入り</span>':""}${m.mainCat?`<span class="tag">${m.mainCat}使い</span>`:""}${winsOf(m)?`<span class="tag tag-win">${TROPHY_SVG}優勝 ${winsOf(m)}回</span>`:""}${isNew?'<span class="tag">NEW</span>':""}${joinTs(m)?`<span>${fmtD(joinTs(m), true)} 加入（加入から${joinDays(m)}日）</span>`:""}${m.updTs ? `<span>${joinTs(m)?"・":""}${new Date(m.updTs).toLocaleDateString("ja-JP",{year:"numeric",month:"numeric",day:"numeric"})} 更新</span>`:""}${isStale(m)?`<span class="tag tag-stale">最終更新から${staleDays(m)}日</span>`:""}</div>
+        <div class="pf-sub">${getMe()===m.key?'<span class="tag me-tag">自分</span>':""}${isFav(m)?'<span class="tag">★ お気に入り</span>':""}${regionOf(m)?`<span class="tag tag-rg rg-${REGION_CLS[regionOf(m)]}">${REGION_LABEL[regionOf(m)]}</span>`:""}${m.mainCat?`<span class="tag">${m.mainCat}使い</span>`:""}${winsOf(m)?`<span class="tag tag-win">${TROPHY_SVG}優勝 ${winsOf(m)}回</span>`:""}${isNew?'<span class="tag">NEW</span>':""}${joinTs(m)?`<span>${fmtD(joinTs(m), true)} 加入（加入から${joinDays(m)}日）</span>`:""}${m.updTs ? `<span>${joinTs(m)?"・":""}${new Date(m.updTs).toLocaleDateString("ja-JP",{year:"numeric",month:"numeric",day:"numeric"})} 更新</span>`:""}${isStale(m)?`<span class="tag tag-stale">最終更新から${staleDays(m)}日</span>`:""}</div>
       </div>
     </div>
     <div class="pf-contact">
@@ -2403,11 +2430,42 @@ TL_ACTS.fteam = a=>{ fesTeam = a.dataset.v; tlRender(); };
 TL_ACTS.fsort = a=>{ fesSort = a.dataset.v; tlRender(); };
 function openFes(){ if(!FES.length){ toast("フェスの記録がありません"); return; } openTool("フェスランキング", "最高フェスパワー・100ケツの順位", fesBody); }
 
+/* ---------- 東西決戦（東日本／西日本） ---------- */
+let REGIONS = {};
+const REGION_LABEL = {"東": "東日本", "西": "西日本"}, REGION_CLS = {"東": "e", "西": "w"};
+function setRegions(list){
+  REGIONS = {}; (list || []).forEach(r=>{ if(r && r[0] && (r[1] === "東" || r[1] === "西")) REGIONS[norm(r[0])] = r[1]; });
+  const b = $("rgBtn"); if(b) b.hidden = !Object.keys(REGIONS).length;
+  if(st.region && !Object.keys(REGIONS).length) st.region = "";
+}
+function regionOf(m){ return (m && REGIONS[m.key]) || ""; }
+function regionMark(m){ const g = regionOf(m); return g ? `<span class="rgm rg-${REGION_CLS[g]}" title="${REGION_LABEL[g]}">${g}</span>` : ""; }
+function regionChips(){
+  if(!Object.keys(REGIONS).length) return "";
+  return ["東","西"].map(g=>`<button class="chip chip-rg rg-${REGION_CLS[g]}${st.region===g?' on':''}" data-rg="${g}" title="${REGION_LABEL[g]}と答えた人だけ表示">${REGION_LABEL[g]}<span class="n">${members.filter(m=>regionOf(m)===g).length}</span></button>`).join("");
+}
+function regionBody(){
+  const side = g => members.filter(m=>regionOf(m) === g).sort((a,b)=>b.power-a.power);
+  const E = side("東"), W = side("西"), none = members.length - E.length - W.length;
+  const st2 = l => { const p = l.filter(m=>m.power>0).map(m=>m.power); return { n: l.length, avg: p.length ? avg(p) : NaN, top: p.length ? p[0] : NaN, top4: p.length ? avg(p.slice(0, 4)) : NaN }; };
+  const se = st2(E), sw = st2(W), tot = (E.length + W.length) || 1;
+  const col = (g, l, s) => `<div class="rg-side" style="--rc:var(--rg-${REGION_CLS[g]})"><h3>${REGION_LABEL[g]}</h3>
+    <div class="rg-stat"><span><b>${s.n}</b>人</span><span>平均 <b>${fmt(s.avg)}</b></span><span>上位4人の平均 <b>${fmt(s.top4)}</b></span></div>
+    ${l.length ? l.map((m, i)=>`<div class="rg-row"><span class="tl-rk">${i+1}</span><span class="person" data-key="${esc(m.key)}">${avatarSmall(m)}<b>${esc(m.name)}</b></span><span class="p">${m.power || "–"}</span></div>`).join("") : '<div class="tl-empty">まだいません</div>'}</div>`;
+  return `<div class="pf-sec"><p>東西の回答をした人の一覧です。未回答 ${none}人</p>
+      <div class="rg-bar"><i style="width:${E.length/tot*100}%;background:var(--rg-e)"></i><i style="width:${W.length/tot*100}%;background:var(--rg-w)"></i></div>
+      <div class="rg-stat"><span style="color:var(--rg-e)">東日本 <b>${E.length}</b>人</span><span style="color:var(--rg-w)">西日本 <b>${W.length}</b>人</span></div>
+      <div class="tbtns"><button data-tl="rgPick" data-v="東">東日本の人を名簿で選択</button><button data-tl="rgPick" data-v="西">西日本の人を名簿で選択</button></div></div>
+    <div class="rg-cols">${col("東", E, se)}${col("西", W, sw)}</div>`;
+}
+TL_ACTS.rgPick = a=>{ members.filter(m=>regionOf(m) === a.dataset.v).forEach(m=>st.picked.add(m.key)); render(); toast(REGION_LABEL[a.dataset.v] + "の人を選択しました"); };
+function openRegion(){ if(!Object.keys(REGIONS).length){ toast("東西の回答がまだありません"); return; } openTool("Ns東西決戦", "東日本・西日本の回答", regionBody); }
+
 /* ---------- ボタンのつなぎ込み ---------- */
 $("tools").addEventListener("click", e=>{
   const b = e.target.closest("[data-tool]"); if(!b) return;
   if(!members.length){ toast("読み込み中です"); return; }
-  ({recent: openRecent, growth: openGrowth, stats: openStats, stale: openStale, fes: openFes})[b.dataset.tool]();
+  ({recent: openRecent, growth: openGrowth, stats: openStats, stale: openStale, fes: openFes, region: openRegion})[b.dataset.tool]();
 });
 $("selTeam").addEventListener("click", ()=>{ const n = selList().length; if(n < 4){ toast("チーム分けには4人以上選んでください（今は" + n + "人）"); return; } openTeam(); });
 $("selTime").addEventListener("click", ()=>{ const n = selList().length; if(n < 2){ toast("2人以上選んでください"); return; } openOverlap(); });
