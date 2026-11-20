@@ -1057,7 +1057,8 @@ function joinBadges(m){
 }
 function badgesOf(m){ return joinBadges(m).concat((m && BADGES[m.key]) || []); }
 function badgeHtml(m){
-  const l = badgesOf(m); if(!l.length) return "";
+  /* 個人ページの加入バッジは、いちばん長い期間の1個だけ（プロフィール画像では本人が選べる） */
+  const l = joinBadges(m).slice(0, 1).concat(BADGES[m.key] || []); if(!l.length) return "";
   return `<span class="pf-badges">${l.map(b=>`<img class="bdg-img" src="${esc(b.url)}" alt="${esc(b.desc || "バッジ")}" title="${esc(b.desc)}" data-bdesc="${esc(b.desc)}" loading="lazy" decoding="async" onerror="this.remove()">`).join("")}</span>`;
 }
 function colorOf(m){ return (m && COLOR_MAP[m.key]) || ""; }
